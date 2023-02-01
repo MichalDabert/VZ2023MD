@@ -1,0 +1,54 @@
+""" This module initialises all tone data variables. Tonedata is a block of voice patch data (336 bytes) """
+
+
+
+def init_tonedata()
+
+EXT PHASE
+byte_no = 0
+0 = off
+1 = on
+m4_ext_phase
+bit = 8
+m6_ext_phase
+bit = 7
+m8_ext_phase
+bit = 6
+
+LINE, WAVE FORM
+byte_no = 1
+[M1, M2][M2,]
+bit
+bit
+bit
+bit
+bit
+bit
+bit
+bit
+
+byte_no = 2
+byte_no = 3
+byte_no = 4
+
+DETUNE 5-20
+ENVELOPE (PITCH, AMP) 21-164
+AMP ENV END STEP, AMP SENS 165-172
+PITCH END STEP 173
+TOTAL LEVEL 174
+A NEW(sic) ENV DEPTH, MODULE ON/OFF 175-182
+PITCH ENV DEPTH, RANGE 183
+LEVEL KEYBOARD FOLLOW (AMP) 184-279
+LEVEL KEYBOARD FOLLOW (PITCH) 280-291
+RATE KEYBOARD FOLLOW 292-303
+VELOCITY SENS 304-313
+VIBRATO (WAVE, MULTI), OCTAVE 314
+VIBRATO DEPTH 315
+VIBRATO RATE 316
+VIBRATO DELAY 317
+TREMOLO (WAVE, MULTI) 318
+TREMOLO DEPTH 319
+TREMOLO RATE 320
+TREMOLO DELAY 321
+VOICE NAME 322-335
+CHECKSUM 336
