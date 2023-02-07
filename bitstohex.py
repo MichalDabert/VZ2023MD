@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QCheckBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 
+
 def bits_to_hex(b1, b2, b3, b4, b5, b6, b7, b8):
     bits = [1 if b else 0 for b in [b1, b2, b3, b4, b5, b6, b7, b8]]  # list comprehension
     decimal = int(''.join(map(str, bits)), 2)
