@@ -1,8 +1,9 @@
 import rtmidi
 from PySide6 import QtGui
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, QSlider, QLabel
 
-from qt_material import apply_stylesheet
+#from qt_material import apply_stylesheet
 
 
 """
@@ -17,7 +18,8 @@ if available_ports:
 else:
     midiout.open_virtual_port("My virtual output")
 
-midi_channel = 0x70 # default MIDI channel 1
+midi_channel = 0x70  # default MIDI channel 1
+bend_range = 0x04  # default four semitones
 
 """
 GUI things
@@ -29,7 +31,7 @@ main_window.setWindowTitle("CASIO VZ1 controller VZ2023MD")
 main_window.setMinimumWidth(666)
 icon = QtGui.QIcon("VZ2023MD.png")
 main_window.setWindowIcon(icon)
-apply_stylesheet(app, theme='dark_red.xml')
+#apply_stylesheet(app, theme='dark_red.xml')
 
 voice_slots = {
     "normal": 40,  # Compare/Recall slot 0
@@ -68,7 +70,7 @@ syx_messages = {  # MIDI system exclusive
     "card_bank_2": [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x51, 0x01, 0xF7],
     "card_bank_3": [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x51, 0x02, 0xF7],
     "card_bank_4": [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x51, 0x03, 0xF7],
-    #"bend_range" : [0xF0, 0x44, 0x00, 0x00, midi_channel, 0x40, bend_range, 0xF7],
+    "bend_range" : [0xF0, 0x44, 0x00, 0x00, midi_channel, 0x40, bend_range, 0xF7],
     "master_tune": [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x40, 0x00, 0x08, 0x05, 0xF7],  # set to standard A4=440Hz
     "open"       : {
     "int_tones"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x70, 0x00, 0xF7],
@@ -78,6 +80,76 @@ syx_messages = {  # MIDI system exclusive
     "ok"         : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x72, 0xF7],
     "error"      : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x73, 0xF7],
     }
+
+
+"""
+bend range slider
+"""
+
+bend_slider = QSlider(Qt.Horizontal)
+bend_slider.setRange(0, 48)
+bend_slider.setTickInterval(1)
+bend_slider.setTickPosition(QSlider.TicksBelow)
+
+bend_label = QLabel('Set bend range')
+bend_label.setAlignment(Qt.AlignHCenter)
+
+
+# Update the label text when the slider value changes
+
+def update_bend_range_value():
+    syx_messages["bend_range"][6] = bend_slider.value()
+
+
+def update_bend_label_text(value):
+    common_interval_names = {
+        0: "perfect unison",
+        1: "minor second",
+        2: "major second",
+        3: "minor third",
+        4: "major third",
+        5: "perfect fourth",
+        7: "perfect fifth",
+        8: "minor sixth",
+        9: "major sixth",
+        10: "minor seventh",
+        11: "major seventh",
+        12: "perfect octave",
+        14: "minor ninth",
+        15: "major ninth",
+        16: "minor tenth",
+        17: "major tenth",
+        19: "perfect eleventh",
+        20: "augmented eleventh",
+        21: "perfect twelfth",
+        23: "minor thirteenth",
+        24: "major thirteenth",
+        26: "minor fourteenth",
+        27: "major fourteenth",
+        28: "perfect octave",
+        31: "minor seventeenth",
+        32: "major seventeenth",
+        33: "perfect eighteenth",
+        36: "perfect fifth",
+        48: "perfect octave"
+    }
+
+    if value in common_interval_names:
+        bend_label.setText(common_interval_names[value].title())
+    else:
+        bend_label.setText(str(value) + " semitones")
+
+
+
+
+
+
+bend_slider.valueChanged.connect(update_bend_label_text)
+bend_slider.valueChanged.connect(update_bend_range_value)
+bend_slider.valueChanged.connect(lambda: midiout.send_message(syx_messages["bend_range"]))
+bend_slider.valueChanged.connect(lambda: print(syx_messages["bend_range"]))
+
+
 
 
 """
@@ -168,6 +240,8 @@ main_layout.addLayout(layout4)
 
 #top_box.addWidget(midi_channel_selector)
 top_box.addWidget(transpose_selector)
+top_box.addWidget(bend_slider)
+top_box.addWidget(bend_label)
 top_box.addWidget(master_button)
 top_box.addWidget(normal_button)
 top_box.addWidget(combin_button)
