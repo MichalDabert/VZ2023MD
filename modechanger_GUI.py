@@ -2,7 +2,7 @@ import rtmidi
 from PySide6 import QtGui
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox
 
-#from qt_material import apply_stylesheet
+from qt_material import apply_stylesheet
 
 
 """
@@ -29,7 +29,7 @@ main_window.setWindowTitle("CASIO VZ1 controller VZ2023MD")
 main_window.setMinimumWidth(666)
 icon = QtGui.QIcon("VZ2023MD.png")
 main_window.setWindowIcon(icon)
-#apply_stylesheet(app, theme='dark_red.xml')
+apply_stylesheet(app, theme='dark_red.xml')
 
 voice_slots = {
     "normal": 40,  # Compare/Recall slot 0
@@ -99,6 +99,7 @@ keyboard transposition selector
 """
 transpose_selector = QComboBox()
 transpose_selector.addItems(syx_messages["key_trnspse"])
+transpose_selector.setMaxVisibleItems(transpose_selector.count())
 transpose_selector.setCurrentIndex(5)  # C
 key = transpose_selector.currentIndex()
 transpose_selector.currentIndexChanged.connect(
@@ -110,13 +111,17 @@ transpose_selector.currentIndexChanged.connect(
 """
 Buttons
 """
+button_height = 50
 master_button = QPushButton("Tune to A4=440Hz")
 master_button.clicked.connect(lambda: midiout.send_message(syx_messages["master_tune"]))
 normal_button = QPushButton("Normal Mode")
+normal_button.setMinimumHeight(button_height)
 normal_button.clicked.connect(lambda: midiout.send_message(syx_messages["normal_mode"]))
 combin_button = QPushButton("Combination Mode")
+combin_button.setMinimumHeight(button_height)
 combin_button.clicked.connect(lambda: midiout.send_message(syx_messages["combin_mode"]))
 opmemo_button = QPushButton("Operator Memory Mode")
+opmemo_button.setMinimumHeight(button_height)
 opmemo_button.clicked.connect(lambda: midiout.send_message(syx_messages["opmemo_mode"]))
 multch_button = QPushButton("Multi Channel Mode")
 multch_button.clicked.connect(lambda: midiout.send_message(syx_messages["multch_mode"]))
