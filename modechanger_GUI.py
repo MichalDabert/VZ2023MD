@@ -1,36 +1,96 @@
 import rtmidi
 from PySide6 import QtGui
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, QSlider, QLabel
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, QSlider, QLabel, QDialog
 
 #from qt_material import apply_stylesheet
 
 
 """
-establish MIDI connection
+Dialog to establish MIDI connection, select channel
 """
-midiout = rtmidi.MidiOut()
-available_ports = midiout.get_ports()
-print(midiout.get_ports())
 
-if available_ports:
-    midiout.open_port(1)  # placeholder
-else:
-    midiout.open_virtual_port("My virtual output")
 
-midi_channel = 0x70  # default MIDI channel 1
-bend_range = 0x04  # default four semitones
+class MidiPortDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.midiout = rtmidi.MidiOut()
+        self.setWindowTitle("Select MIDI Port")
+        self.setFixedSize(300, 100)
+
+        self.port_combo = QComboBox()
+        self.update_ports()
+        self.port_combo.currentIndexChanged.connect(self.port_selected)
+
+        self.midi_channel_selector = QComboBox()
+        self.midi_channel_selector.addItems([f"Channel: {i}" for i in range(1, 17)])
+        self.midi_channel_selector.setCurrentIndex(0)  # Set the default value to channel 1
+        self.midi_channel_selector.currentIndexChanged.connect(self.set_midi_channel)
+
+        self.open_button = QPushButton("Open Port")
+        self.open_button.clicked.connect(self.open_port)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.port_combo)
+        layout.addWidget(self.midi_channel_selector)
+        layout.addWidget(self.open_button)
+        self.setLayout(layout)
+
+    def update_ports(self):
+        available_ports = self.midiout.get_ports()
+        self.port_combo.clear()
+        self.port_combo.addItems(available_ports)
+        if "Microsoft GS Wavetable Synth 0" in available_ports:
+            # Get the current index of the QComboBox
+            current_index = self.port_combo.currentIndex()
+
+            # next index if the current index is "Microsoft GS Wavetable Synth 0"
+            if self.port_combo.currentText() == "Microsoft GS Wavetable Synth 0":
+                self.port_combo.setCurrentIndex(current_index + 1)
+
+    def port_selected(self, index):
+        self.selected_port = self.port_combo.currentText()
+
+    def set_midi_channel(self, index):
+        self.selected_midich = self.midi_channel_selector.currentIndex() + 112
+        print(f"MIDI output channel: {self.selected_midich}")
+
+    def open_port(self):
+        available_ports = self.midiout.get_ports()
+        if available_ports:
+            selected_index = self.port_combo.currentIndex()
+            self.midiout.open_port(selected_index)
+        else:
+            self.midiout.open_virtual_port("My virtual output")
+
+        self.accept()
+
+    """
+    MIDI channel selector
+    """
+
 
 """
 GUI things
 """
+
 app = QApplication()
+dialog = MidiPortDialog()
+dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
+dialog.exec()
 main_window = QMainWindow()
 main_window.setWindowTitle("CASIO VZ1 controller VZ2023MD")
 main_window.setMinimumWidth(666)
 icon = QtGui.QIcon("VZ2023MD.png")
 main_window.setWindowIcon(icon)
 #apply_stylesheet(app, theme='dark_red.xml')
+
+try:
+    midi_channel = dialog.selected_midich
+except AttributeError:
+    midi_channel = 112
+
+bend_range = 0x04  # default four semitones
 
 voice_slots = {
     "normal": 40,  # Compare/Recall slot 0
@@ -135,28 +195,10 @@ bend_slider.setTickInterval(1)
 bend_slider.setTickPosition(QSlider.TicksBelow)
 bend_slider.valueChanged.connect(update_bend_label_text)
 bend_slider.valueChanged.connect(update_bend_range_value)
-bend_slider.valueChanged.connect(lambda: midiout.send_message(syx_messages["bend_range"]))
+bend_slider.valueChanged.connect(lambda: dialog.midiout.send_message(syx_messages["bend_range"]))
 bend_slider.valueChanged.connect(lambda: print(syx_messages["bend_range"]))
 bend_label = QLabel('Set bend range')
 bend_label.setAlignment(Qt.AlignHCenter)
-
-
-"""
-MIDI channel selector
-"""
-
-
-def set_midi_channel():
-    midi_channel = hex(midi_channel_selector.currentIndex() + 112)
-    print(f"MIDI output channel:{midi_channel}")
-
-
-midi_channel_selector = QComboBox()
-midi_channel_selector.addItems([f"Channel: {i}" for i in range(1, 17)])
-#midi_channel_selector.setCurrentIndex(0) # Set the default value to channel 1
-selected_midich = midi_channel_selector.currentIndex()
-midi_channel_selector.currentIndexChanged.connect(set_midi_channel()) # Get user input when the value changes
-# Function to set the value of the midi channel
 
 
 """
@@ -168,36 +210,56 @@ transpose_selector.setMaxVisibleItems(transpose_selector.count())
 transpose_selector.setCurrentIndex(5)  # C
 key = transpose_selector.currentIndex()
 transpose_selector.currentIndexChanged.connect(
-    lambda index: midiout.send_message(syx_messages["key_trnspse"][transpose_selector.itemText(index)])
-    # index as an arg
+    lambda index: dialog.midiout.send_message(syx_messages["key_trnspse"][transpose_selector.itemText(index)])
 )
+
+"""
+SYSEX sender
+"""
+
+
+def send_syx(message):
+    dialog.midiout.send_message(syx_messages[message])
+    print(message)
+
 
 
 """
 Buttons
 """
+
 button_height = 50
+
 master_button = QPushButton("Tune to A4=440Hz")
-master_button.clicked.connect(lambda: midiout.send_message(syx_messages["master_tune"]))
+master_button.clicked.connect(lambda: send_syx("master_tune"))
+
 normal_button = QPushButton("Normal Mode")
 normal_button.setMinimumHeight(button_height)
-normal_button.clicked.connect(lambda: midiout.send_message(syx_messages["normal_mode"]))
+normal_button.clicked.connect(lambda: send_syx("normal_mode"))
+
 combin_button = QPushButton("Combination Mode")
 combin_button.setMinimumHeight(button_height)
-combin_button.clicked.connect(lambda: midiout.send_message(syx_messages["combin_mode"]))
-opmemo_button = QPushButton("Operator Memory Mode")
+combin_button.clicked.connect(lambda: send_syx("combin_mode"))
+
+opmemo_button = QPushButton("Operation Memory Mode")
 opmemo_button.setMinimumHeight(button_height)
-opmemo_button.clicked.connect(lambda: midiout.send_message(syx_messages["opmemo_mode"]))
+opmemo_button.clicked.connect(lambda: send_syx("opmemo_mode"))
+
 multch_button = QPushButton("Multi Channel Mode")
-multch_button.clicked.connect(lambda: midiout.send_message(syx_messages["multch_mode"]))
+multch_button.clicked.connect(lambda: send_syx("multch_mode"))
+
 multp0_button = QPushButton("Multi Channel Poly 0")
-multp0_button.clicked.connect(lambda: midiout.send_message(syx_messages["multp0_mode"]))
+multp0_button.clicked.connect(lambda: send_syx("multp0_mode"))
+
 multp1_button = QPushButton("Multi Channel Poly 1")
-multp1_button.clicked.connect(lambda: midiout.send_message(syx_messages["multp1_mode"]))
+multp1_button.clicked.connect(lambda: send_syx("multp1_mode"))
+
 card_b_1_button = QPushButton("Card Bank 1")
-card_b_1_button.clicked.connect(lambda: midiout.send_message(syx_messages["card_bank_1"]))
+card_b_1_button.clicked.connect(lambda: send_syx("card_bank_1"))
+
 card_b_2_button = QPushButton("Card Bank 2")
-card_b_2_button.clicked.connect(lambda: midiout.send_message(syx_messages["card_bank_2"]))
+card_b_2_button.clicked.connect(lambda: send_syx("card_bank_2"))
+
 
 """
 Voice selector
@@ -214,9 +276,9 @@ voice_combo.currentIndexChanged.connect(lambda: send_program_change(bank_combo, 
 def send_program_change(bank_combo, voice_combo):
     bank_index = bank_combo.currentIndex()  # Get the selected index for each combo box
     voice_index = voice_combo.currentIndex()
-    value = (bank_index * 8) + voice_index # Combine the indices into a single value
+    value = (bank_index * 8) + voice_index  # Combine the indices into a single value
     program_change = [0xC0, value]
-    midiout.send_message(program_change)
+    dialog.midiout.send_message(program_change)
 
 
 """
@@ -231,7 +293,6 @@ main_layout.addLayout(top_box)
 main_layout.addLayout(layout3)
 main_layout.addLayout(layout4)
 
-top_box.addWidget(midi_channel_selector)
 top_box.addWidget(transpose_selector)
 top_box.addWidget(bend_slider)
 top_box.addWidget(bend_label)
