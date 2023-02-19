@@ -25,7 +25,6 @@ bend_range = 0x04  # default four semitones
 GUI things
 """
 app = QApplication()
-
 main_window = QMainWindow()
 main_window.setWindowTitle("CASIO VZ1 controller VZ2023MD")
 main_window.setMinimumWidth(666)
@@ -86,16 +85,6 @@ syx_messages = {  # MIDI system exclusive
 bend range slider
 """
 
-bend_slider = QSlider(Qt.Horizontal)
-bend_slider.setRange(0, 48)
-bend_slider.setTickInterval(1)
-bend_slider.setTickPosition(QSlider.TicksBelow)
-
-bend_label = QLabel('Set bend range')
-bend_label.setAlignment(Qt.AlignHCenter)
-
-
-# Update the label text when the slider value changes
 
 def update_bend_range_value():
     syx_messages["bend_range"][6] = bend_slider.value()
@@ -140,31 +129,35 @@ def update_bend_label_text(value):
         bend_label.setText(str(value) + " semitones")
 
 
-
-
-
-
+bend_slider = QSlider(Qt.Horizontal)
+bend_slider.setRange(0, 48)
+bend_slider.setTickInterval(1)
+bend_slider.setTickPosition(QSlider.TicksBelow)
 bend_slider.valueChanged.connect(update_bend_label_text)
 bend_slider.valueChanged.connect(update_bend_range_value)
 bend_slider.valueChanged.connect(lambda: midiout.send_message(syx_messages["bend_range"]))
 bend_slider.valueChanged.connect(lambda: print(syx_messages["bend_range"]))
-
-
+bend_label = QLabel('Set bend range')
+bend_label.setAlignment(Qt.AlignHCenter)
 
 
 """
-MIDI channel selector does not work yet
+MIDI channel selector
 """
 
-#midi_channel_selector = QComboBox()
-#midi_channel_selector.addItems([f"Channel: {i}" for i in range(1, 17)])
+
+def set_midi_channel():
+    midi_channel = hex(midi_channel_selector.currentIndex() + 112)
+    print(f"MIDI output channel:{midi_channel}")
+
+
+midi_channel_selector = QComboBox()
+midi_channel_selector.addItems([f"Channel: {i}" for i in range(1, 17)])
 #midi_channel_selector.setCurrentIndex(0) # Set the default value to channel 1
-#midi_channel_selector.currentIndexChanged.connect(lambda: set_midi_channel(midi_channel_selector.currentIndex()+1)) # Get user input when the value changes
+selected_midich = midi_channel_selector.currentIndex()
+midi_channel_selector.currentIndexChanged.connect(set_midi_channel()) # Get user input when the value changes
 # Function to set the value of the midi channel
-#def set_midi_channel(channel):
-#    midi_channel = hex(channel + 111) # not global!!
-#    print(f"MIDI output channel:{(midi_channel)}")
-#   print(syx_messages["normal_mode"])
+
 
 """
 keyboard transposition selector
@@ -238,7 +231,7 @@ main_layout.addLayout(top_box)
 main_layout.addLayout(layout3)
 main_layout.addLayout(layout4)
 
-#top_box.addWidget(midi_channel_selector)
+top_box.addWidget(midi_channel_selector)
 top_box.addWidget(transpose_selector)
 top_box.addWidget(bend_slider)
 top_box.addWidget(bend_label)
