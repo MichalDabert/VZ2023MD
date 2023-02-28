@@ -101,7 +101,7 @@ voice_slots = {
 }
 
 syx_messages = {  # MIDI system exclusive
-    "tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, voice_slots["normal"], tone_internal, tone_checksum, 0xF7],
+    #"tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, voice_slots["normal"], tone_internal, tone_checksum, 0xF7],
     #"opme_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x01, voice_slots["normal"], opme_data, opme_checksum, 0xF7], # default voice slot 40 sound area ??
     #"mltch_data" : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x02, 0x00, mltch_data, mltch_checksum, 0xF7],
 
