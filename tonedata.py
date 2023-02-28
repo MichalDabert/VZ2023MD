@@ -60,7 +60,23 @@ class Voice:
                  pitch_vel_rate_6, pitch_rate_6, pitch_sus_6, pitch_level_6,
                  pitch_vel_rate_7, pitch_rate_7, pitch_sus_7, pitch_level_7,
                  pitch_vel_rate_8, pitch_rate_8, pitch_sus_8, pitch_level_8,
-                 voice_name=None):
+                 pitch_env_end, total_level, pitch_range, pitch_env_depth,
+                 kb_follow_pitch_key_1, kb_follow_pitch_level_1,
+                 kb_follow_pitch_key_2, kb_follow_pitch_level_2,
+                 kb_follow_pitch_key_3, kb_follow_pitch_level_3,
+                 kb_follow_pitch_key_4, kb_follow_pitch_level_4,
+                 kb_follow_pitch_key_5, kb_follow_pitch_level_5,
+                 kb_follow_pitch_key_6, kb_follow_pitch_level_6,
+                 rate_kb_follow_key_1, rate_kb_follow_rate_1,
+                 rate_kb_follow_key_2, rate_kb_follow_rate_2,
+                 rate_kb_follow_key_3, rate_kb_follow_rate_3,
+                 rate_kb_follow_key_4, rate_kb_follow_rate_4,
+                 rate_kb_follow_key_5, rate_kb_follow_rate_5,
+                 rate_kb_follow_key_6, rate_kb_follow_rate_6,
+                 octave_pol, octave_no,
+                 vib_multi,vib_wave, vib_depth, vib_rate, vib_delay,
+                 trm_multi,trm_wave, trm_depth, trm_rate, trm_delay,
+                 voice_name):
 
         self.m4_ext_phase = m4_ext_phase
         self.m6_ext_phase = m6_ext_phase
@@ -114,6 +130,62 @@ class Voice:
         self.pitch_rate_8 = pitch_rate_8
         self.pitch_sus_8 = pitch_sus_8
         self.pitch_level_8 = pitch_level_8
+
+        self.pitch_env_end = pitch_env_end
+        self.total_level = total_level
+        self.pitch_range = pitch_range
+        self.pitch_env_depth = pitch_env_depth
+
+        self.kb_follow_pitch_key_1 = kb_follow_pitch_key_1
+        self.kb_follow_pitch_level_1 = kb_follow_pitch_level_1
+
+        self.kb_follow_pitch_key_2 = kb_follow_pitch_key_2
+        self.kb_follow_pitch_level_2 = kb_follow_pitch_level_2
+
+        self.kb_follow_pitch_key_3 = kb_follow_pitch_key_3
+        self.kb_follow_pitch_level_3 = kb_follow_pitch_level_3
+
+        self.kb_follow_pitch_key_4 = kb_follow_pitch_key_4
+        self.kb_follow_pitch_level_4 = kb_follow_pitch_level_4
+
+        self.kb_follow_pitch_key_5 = kb_follow_pitch_key_5
+        self.kb_follow_pitch_level_5 = kb_follow_pitch_level_5
+
+        self.kb_follow_pitch_key_6 = kb_follow_pitch_key_6
+        self.kb_follow_pitch_level_6 = kb_follow_pitch_level_6
+
+        self.rate_kb_follow_key_1 = rate_kb_follow_key_1
+        self.rate_kb_follow_rate_1 = rate_kb_follow_rate_1
+
+        self.rate_kb_follow_key_2 = rate_kb_follow_key_2
+        self.rate_kb_follow_rate_2 = rate_kb_follow_rate_2
+
+        self.rate_kb_follow_key_3 = rate_kb_follow_key_3
+        self.rate_kb_follow_rate_3 = rate_kb_follow_rate_3
+
+        self.rate_kb_follow_key_4 = rate_kb_follow_key_4
+        self.rate_kb_follow_rate_4 = rate_kb_follow_rate_4
+
+        self.rate_kb_follow_key_5 = rate_kb_follow_key_5
+        self.rate_kb_follow_rate_5 = rate_kb_follow_rate_5
+
+        self.rate_kb_follow_key_6 = rate_kb_follow_key_6
+        self.rate_kb_follow_rate_6 = rate_kb_follow_rate_6
+
+        self.octave_pol = octave_pol
+        self.octave_no = octave_no
+
+        self.vib_multi = vib_multi
+        self.vib_wave = vib_wave
+        self.vib_depth = vib_depth
+        self.vib_rate = vib_rate
+        self.vib_delay = vib_delay
+
+        self.trm_multi = trm_multi
+        self.trm_wave = trm_wave
+        self.trm_depth = trm_depth
+        self.trm_rate = trm_rate
+        self.trm_delay = trm_delay
 
         self.voice_name = voice_name
 
