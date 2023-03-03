@@ -23,6 +23,138 @@ def hex_to_bits(hex_value, num_bits):
     # Return the variables as a tuple
     return bits
 
+midi_notes = {
+
+    # Octave 0
+    'C0': '0C',
+    'C#0': '0D',
+    'D0': '0E',
+    'D#0': '0F',
+    'E0': '10',
+    'F0': '11',
+    'F#0': '12',
+    'G0': '13',
+    'G#0': '14',
+    'A0': '15',
+    'A#0': '16',
+    'B0': '17',
+
+    # Octave 1
+    'C1': '18',
+    'C#1': '19',
+    'D1': '1A',
+    'D#1': '1B',
+    'E1': '1C',
+    'F1': '1D',
+    'F#1': '1E',
+    'G1': '1F',
+    'G#1': '20',
+    'A1': '21',
+    'A#1': '22',
+    'B1': '23',
+
+    # Octave 2
+    'C2': '24',
+    'C#2': '25',
+    'D2': '26',
+    'D#2': '27',
+    'E2': '28',
+    'F2': '29',
+    'F#2': '2A',
+    'G2': '2B',
+    'G#2': '2C',
+    'A2': '2D',
+    'A#2': '2E',
+    'B2': '2F',
+
+    # Octave 3
+    'C3': '30',
+    'C#3': '31',
+    'D3': '32',
+    'D#3': '33',
+    'E3': '34',
+    'F3': '35',
+    'F#3': '36',
+    'G3': '37',
+    'G#3': '38',
+    'A3': '39',
+    'A#3': '3A',
+    'B3': '3B',
+
+    # Octave 4
+    'C4': '3C',
+    'C#4': '3D',
+    'D4': '3E',
+    'D#4': '3F',
+    'E4': '40',
+    'F4': '41',
+    'F#4': '42',
+    'G4': '43',
+    'G#4': '44',
+    'A4': '45',
+    'A#4': '46',
+    'B4': '47',
+
+    # Octave 5
+    'C5': '48',
+    'C#5': '49',
+    'D5': '4A',
+    'D#5': '4B',
+    'E5': '4C',
+    'F5': '4D',
+    'F#5': '4E',
+    'G5': '4F',
+    'G#5': '50',
+    'A5': '51',
+    'A#5': '52',
+    'B5': '53',
+
+    # Octave 6
+    'C6': '54',
+    'C#6': '55',
+    'D6': '56',
+    'D#6': '57',
+    'E6': '58',
+    'F6': '59',
+    'F#6': '5A',
+    'G6': '5B',
+    'G#6': '5C',
+    'A6': '5D',
+    'A#6': '5E',
+    'B6': '5F',
+
+    # Octave 7
+    "C7": "60",
+    "C#7": "61",
+    "D7": "62",
+    "D#7": "63",
+    "E7": "64",
+    "F7": "65",
+    "F#7": "66",
+    "G7": "67",
+    "G#7": "68",
+    "A7": "69",
+    "A#7": "6A",
+    "B7": "6B",
+
+    # Octave 8
+    "C8": "6C",
+    "C#8": "6D",
+    "D8": "6E",
+    "D#8": "6F",
+    "E8": "70",
+    "F8": "71",
+    "F#8": "72",
+    "G8": "73",
+    "G#8": "74",
+    "A8": "75",
+    "A#8": "76",
+    "B8": "77",
+
+    # Octave 9
+    "C9": "78",
+}
+
 """
 classes
 """
@@ -50,33 +182,34 @@ this will include Module data and voice variables (pitch, total volume, name etc
 
 class Voice:
     def __init__(self,
-                 m4_ext_phase, m6_ext_phase, m8_ext_phase,
-                 line_a, line_b, line_c, line_d,
-                 pitch_vel_rate_1, pitch_rate_1, pitch_sus_1, pitch_level_1,
-                 pitch_vel_rate_2, pitch_rate_2, pitch_sus_2, pitch_level_2,
-                 pitch_vel_rate_3, pitch_rate_3, pitch_sus_3, pitch_level_3,
-                 pitch_vel_rate_4, pitch_rate_4, pitch_sus_4, pitch_level_4,
-                 pitch_vel_rate_5, pitch_rate_5, pitch_sus_5, pitch_level_5,
-                 pitch_vel_rate_6, pitch_rate_6, pitch_sus_6, pitch_level_6,
-                 pitch_vel_rate_7, pitch_rate_7, pitch_sus_7, pitch_level_7,
-                 pitch_vel_rate_8, pitch_rate_8, pitch_sus_8, pitch_level_8,
-                 pitch_env_end, total_level, pitch_range, pitch_env_depth,
-                 kb_follow_pitch_key_1, kb_follow_pitch_level_1,
-                 kb_follow_pitch_key_2, kb_follow_pitch_level_2,
-                 kb_follow_pitch_key_3, kb_follow_pitch_level_3,
-                 kb_follow_pitch_key_4, kb_follow_pitch_level_4,
-                 kb_follow_pitch_key_5, kb_follow_pitch_level_5,
-                 kb_follow_pitch_key_6, kb_follow_pitch_level_6,
-                 rate_kb_follow_key_1, rate_kb_follow_rate_1,
-                 rate_kb_follow_key_2, rate_kb_follow_rate_2,
-                 rate_kb_follow_key_3, rate_kb_follow_rate_3,
-                 rate_kb_follow_key_4, rate_kb_follow_rate_4,
-                 rate_kb_follow_key_5, rate_kb_follow_rate_5,
-                 rate_kb_follow_key_6, rate_kb_follow_rate_6,
-                 octave_pol, octave_no,
-                 vib_multi,vib_wave, vib_depth, vib_rate, vib_delay,
-                 trm_multi,trm_wave, trm_depth, trm_rate, trm_delay,
-                 voice_name):
+                 m4_ext_phase=False, m6_ext_phase=False, m8_ext_phase=False,
+                 line_a="mix", line_b="mix", line_c="mix", line_d="mix",
+                 pitch_vel_rate_1=False, pitch_rate_1=0, pitch_sus_1=False, pitch_level_1=0,
+                 pitch_vel_rate_2=False, pitch_rate_2=0, pitch_sus_2=False, pitch_level_2=0,
+                 pitch_vel_rate_3=False, pitch_rate_3=0, pitch_sus_3=False, pitch_level_3=0,
+                 pitch_vel_rate_4=False, pitch_rate_4=0, pitch_sus_4=False, pitch_level_4=0,
+                 pitch_vel_rate_5=False, pitch_rate_5=0, pitch_sus_5=False, pitch_level_5=0,
+                 pitch_vel_rate_6=False, pitch_rate_6=0, pitch_sus_6=False, pitch_level_6=0,
+                 pitch_vel_rate_7=False, pitch_rate_7=0, pitch_sus_7=False, pitch_level_7=0,
+                 pitch_vel_rate_8=False, pitch_rate_8=0, pitch_sus_8=False, pitch_level_8=0,
+                 pitch_env_end=0, total_level=0, pitch_range=False,  # False/0/ Narrow
+                 pitch_env_depth=0,
+                 kb_follow_pitch_key_1=midi_notes["C0"], kb_follow_pitch_level_1=0,
+                 kb_follow_pitch_key_2=midi_notes["C1"], kb_follow_pitch_level_2=0,
+                 kb_follow_pitch_key_3=midi_notes["C2"], kb_follow_pitch_level_3=0,
+                 kb_follow_pitch_key_4=midi_notes["C3"], kb_follow_pitch_level_4=0,
+                 kb_follow_pitch_key_5=midi_notes["C4"], kb_follow_pitch_level_5=0,
+                 kb_follow_pitch_key_6=midi_notes["C5"], kb_follow_pitch_level_6=0,
+                 rate_kb_follow_key_1=midi_notes["C1"], rate_kb_follow_rate_1=0,
+                 rate_kb_follow_key_2=midi_notes["C2"], rate_kb_follow_rate_2=0,
+                 rate_kb_follow_key_3=midi_notes["C3"], rate_kb_follow_rate_3=0,
+                 rate_kb_follow_key_4=midi_notes["C4"], rate_kb_follow_rate_4=0,
+                 rate_kb_follow_key_5=midi_notes["C5"], rate_kb_follow_rate_5=0,
+                 rate_kb_follow_key_6=midi_notes["C6"], rate_kb_follow_rate_6=0,
+                 octave_pol=False, octave_no=0,
+                 vib_multi=False,vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
+                 trm_multi=False,trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
+                 voice_name="initVZ2023MD"):
 
         self.m4_ext_phase = m4_ext_phase
         self.m6_ext_phase = m6_ext_phase
@@ -86,10 +219,10 @@ class Voice:
         # line, waveform ERROR IN MANUAL PAGE 9. WRONG MODULE WAVEFORM NUMBERING
         lines = {"mix": (0, 0), "phase": (0, 1), "ring": (1, 1)}
 
-        line_a1, line_a2 = lines.get(line_a, (0, 0))  # default values 0
-        line_b1, line_b2 = lines.get(line_b, (0, 0))
-        line_c1, line_c2 = lines.get(line_c, (0, 0))
-        line_d1, line_d2 = lines.get(line_d, (0, 0))
+        self.line_a1, self.line_a2 = lines.get(line_a, (0, 0))  # default values 0
+        self.line_b1, self.line_b2 = lines.get(line_b, (0, 0))
+        self.line_c1, self.line_c2 = lines.get(line_c, (0, 0))
+        self.line_d1, self.line_d2 = lines.get(line_d, (0, 0))
 
         self.pitch_vel_rate_1 = pitch_vel_rate_1
         self.pitch_rate_1 = pitch_rate_1
@@ -198,19 +331,25 @@ reusable Module for M1~M8
 
 
 class Module:
-    def __init__(self, waveform, detune_fine, pitch_fix, range_width, polarity, detune_notes,
-                 vel_rate_1, rate_1, sus_1, level_1, vel_rate_2, rate_2, sus_2, level_2,
-                 vel_rate_3, rate_3, sus_3, level_3, vel_rate_4, rate_4, sus_4, level_4,
-                 vel_rate_5, rate_5, sus_5, level_5, vel_rate_6, rate_6, sus_6, level_6,
-                 vel_rate_7, rate_7, sus_7, level_7, vel_rate_8, rate_8, sus_8, level_8,
-                 amp_sens, env_end_step, module_active, env_depth,
-                 kb_follow_amp_key_1, kb_follow_amp_level_1,
-                 kb_follow_amp_key_2, kb_follow_amp_level_2,
-                 kb_follow_amp_key_3, kb_follow_amp_level_3,
-                 kb_follow_amp_key_4, kb_follow_amp_level_4,
-                 kb_follow_amp_key_5, kb_follow_amp_level_5,
-                 kb_follow_amp_key_6, kb_follow_amp_level_6,
-                 vel_curve, vel_sens):
+    def __init__(self, waveform="sine", detune_fine=0, pitch_fix=False, range_width=False, polarity=True, detune_notes=0,
+                 vel_rate_1=False, rate_1=0, sus_1=False, level_1=0,
+                 vel_rate_2=False, rate_2=0, sus_2=False, level_2=0,
+                 vel_rate_3=False, rate_3=0, sus_3=False, level_3=0,
+                 vel_rate_4=False, rate_4=0, sus_4=False, level_4=0,
+                 vel_rate_5=False, rate_5=0, sus_5=False, level_5=0,
+                 vel_rate_6=False, rate_6=0, sus_6=False, level_6=0,
+                 vel_rate_7=False, rate_7=0, sus_7=False, level_7=0,
+                 vel_rate_8=False, rate_8=0, sus_8=False, level_8=0,
+                 amp_sens=0, env_end_step=0,
+                 module_active=False,  # 0/False/ = module on
+                 env_depth=0,
+                 kb_follow_amp_key_1=0, kb_follow_amp_level_1=0,
+                 kb_follow_amp_key_2=0, kb_follow_amp_level_2=0,
+                 kb_follow_amp_key_3=0, kb_follow_amp_level_3=0,
+                 kb_follow_amp_key_4=0, kb_follow_amp_level_4=0,
+                 kb_follow_amp_key_5=0, kb_follow_amp_level_5=0,
+                 kb_follow_amp_key_6=0, kb_follow_amp_level_6=0,
+                 vel_curve=0, vel_sens=0):
 
         self.waveform = waveform
         self.detune_fine = detune_fine
@@ -287,7 +426,18 @@ class Module:
         self.vel_sens = vel_sens
 
 
-byte_0 = ToneByte(0, 0, 0, 0, 0, m8_ext_phase, m6_ext_phase, m4_ext_phase)
+voice = Voice()
+
+m1 = Module()
+m2 = Module()
+m3 = Module()
+m4 = Module()
+m5 = Module()
+m6 = Module()
+m7 = Module()
+m8 = Module()
+
+byte_0 = ToneByte(0, 0, 0, 0, 0, voice.m8_ext_phase, voice.m6_ext_phase, voice.m4_ext_phase)
 
 
 
