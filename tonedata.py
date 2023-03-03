@@ -15,6 +15,8 @@ def bits_to_hex(b1, b2, b3, b4, b5, b6, b7, b8):
 
 def hex_to_bits(hex_value, num_bits):
     # Convert hexidecimal value to binary string
+    if isinstance(hex_value, int):
+        hex_value = str(hex_value)
     binary_string = bin(int(hex_value, 16))[2:].zfill(num_bits)
 
     # Split binary string into variables, each representing a bit
@@ -172,6 +174,7 @@ class ToneByte:
         self.bit_8 = bit_8
         self.hex_value = bits_to_hex(bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8)
         tone_internal.append(self.hex_value)
+        print(self.hex_value)
         # tone_internal.insert(byte_number, self.hex_value) # add byteno variable and pass as arg?
 
 
@@ -457,20 +460,24 @@ waveforms = {"sine": (0, 0, 0),
              "noise_2": (1, 1, 1)}
 
 
-wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform, (0, 0, 0))
-wave_m2_1, wave_m2_2, wave_m2_3 = waveforms.get(m2.waveform, (0, 0, 0))
-wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(m3.waveform, (0, 0, 0))
-wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(m4.waveform, (0, 0, 0))
-wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(m5.waveform, (0, 0, 0))
-wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(m6.waveform, (0, 0, 0))
-wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(m7.waveform, (0, 0, 0))
-wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(m8.waveform, (0, 0, 0))
+wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform)
+wave_m2_1, wave_m2_2, wave_m2_3 = waveforms.get(m2.waveform)
+wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(m3.waveform)
+wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(m4.waveform)
+wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(m5.waveform)
+wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(m6.waveform)
+wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(m7.waveform)
+wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(m8.waveform)
 
 
 byte_01 = ToneByte(voice.line_a1, voice.line_a2, wave_m2_1, wave_m2_2, wave_m2_3, wave_m1_1, wave_m1_2, wave_m1_3)
+
 byte_02 = ToneByte(voice.line_b1, voice.line_b2, wave_m4_1, wave_m4_2, wave_m4_3, wave_m3_1, wave_m3_2, wave_m3_3)
+
 byte_03 = ToneByte(voice.line_c1, voice.line_c2, wave_m6_1, wave_m6_2, wave_m6_3, wave_m5_1, wave_m5_2, wave_m5_3)
+
 byte_04 = ToneByte(voice.line_d1, voice.line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1, wave_m7_2, wave_m7_3)
+
 
 
 
@@ -482,8 +489,10 @@ byte_04 = ToneByte(voice.line_d1, voice.line_d2, wave_m8_1, wave_m8_2, wave_m8_3
 # Module 1
 fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6 = hex_to_bits(m1.detune_fine, 6)
 byte_05 = ToneByte(fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6, m1.pitch_fix, m1.range_width)
+
 octn_m1_1, octn_m1_2, octn_m1_3, octn_m1_4, octn_m1_5, octn_m1_6, octn_m1_7 = hex_to_bits(m1.detune_notes, 7)
 byte_06 = ToneByte(m1.polarity, octn_m1_1, octn_m1_2, octn_m1_3, octn_m1_4, octn_m1_5, octn_m1_6, octn_m1_7)
+
 
 # Module 2
 fine_m2_1, fine_m2_2, fine_m2_3, fine_m2_4, fine_m2_5, fine_m2_6 = hex_to_bits(m2.detune_fine, 6)
