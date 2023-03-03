@@ -425,6 +425,9 @@ class Module:
         self.vel_curve = vel_curve
         self.vel_sens = vel_sens
 
+"""
+initialized voice and 8 modules with default values
+"""
 
 voice = Voice()
 
@@ -437,9 +440,11 @@ m6 = Module()
 m7 = Module()
 m8 = Module()
 
+"""
+bytes of data formatted according to VZ-1/VZ-10m MIDI System Exclusive Format
+"""
+
 byte_0 = ToneByte(0, 0, 0, 0, 0, voice.m8_ext_phase, voice.m6_ext_phase, voice.m4_ext_phase)
-
-
 
 
 waveforms = {"sine": (0, 0, 0),
@@ -451,30 +456,21 @@ waveforms = {"sine": (0, 0, 0),
              "noise_1": (1, 1, 0),
              "noise_2": (1, 1, 1)}
 
-wave_m1 = "sine"
-wave_m2 = "saw_3"
-wave_m3 = "noise_1"
-wave_m4 = "sine"
-wave_m5 = "saw_2"
-wave_m6 = "saw_3"
-wave_m7 = "noise_1"
-wave_m8 = "saw_5"
+
+wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform, (0, 0, 0))
+wave_m2_1, wave_m2_2, wave_m2_3 = waveforms.get(m2.waveform, (0, 0, 0))
+wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(m3.waveform, (0, 0, 0))
+wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(m4.waveform, (0, 0, 0))
+wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(m5.waveform, (0, 0, 0))
+wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(m6.waveform, (0, 0, 0))
+wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(m7.waveform, (0, 0, 0))
+wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(m8.waveform, (0, 0, 0))
 
 
-wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(wave_m1, (0, 0, 0))
-wave_m2_1, wave_m2_2, wave_m2_3 = waveforms.get(wave_m2, (0, 0, 0))
-wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(wave_m3, (0, 0, 0))
-wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(wave_m4, (0, 0, 0))
-wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(wave_m5, (0, 0, 0))
-wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(wave_m6, (0, 0, 0))
-wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(wave_m7, (0, 0, 0))
-wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(wave_m8, (0, 0, 0))
-
-
-byte_01 = ToneByte(line_a1, line_a2, wave_m2_1, wave_m2_2, wave_m2_3, wave_m1_1, wave_m1_2, wave_m1_3)
-byte_02 = ToneByte(line_b1, line_b2, wave_m4_1, wave_m4_2, wave_m3_3, wave_m3_1, wave_m3_2, wave_m3_3)
-byte_03 = ToneByte(line_c1, line_c2, wave_m6_1, wave_m6_2, wave_m6_3, wave_m5_1, wave_m5_2, wave_m5_3)
-byte_04 = ToneByte(line_d1, line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1, wave_m7_2, wave_m7_3)
+byte_01 = ToneByte(voice.line_a1, voice.line_a2, wave_m2_1, wave_m2_2, wave_m2_3, wave_m1_1, wave_m1_2, wave_m1_3)
+byte_02 = ToneByte(voice.line_b1, voice.line_b2, wave_m4_1, wave_m4_2, wave_m4_3, wave_m3_1, wave_m3_2, wave_m3_3)
+byte_03 = ToneByte(voice.line_c1, voice.line_c2, wave_m6_1, wave_m6_2, wave_m6_3, wave_m5_1, wave_m5_2, wave_m5_3)
+byte_04 = ToneByte(voice.line_d1, voice.line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1, wave_m7_2, wave_m7_3)
 
 
 
@@ -483,28 +479,51 @@ byte_04 = ToneByte(line_d1, line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1,
 
 # detuning, in pairs of bytes 5-20
 
-m1_detune_fine = "2F"
-m1_pitch_fix = True
-m1_range_width = False
-m1_polarity = True
+# Module 1
+fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6 = hex_to_bits(m1.detune_fine, 6)
+byte_05 = ToneByte(fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6, m1.pitch_fix, m1.range_width)
+octn_m1_1, octn_m1_2, octn_m1_3, octn_m1_4, octn_m1_5, octn_m1_6, octn_m1_7 = hex_to_bits(m1.detune_notes, 7)
+byte_06 = ToneByte(m1.polarity, octn_m1_1, octn_m1_2, octn_m1_3, octn_m1_4, octn_m1_5, octn_m1_6, octn_m1_7)
 
-fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6 = hex_to_bits(m1_detune_fine, 6)
-byte_05 = ToneByte(fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6, m1_pitch_fix, m1_range_width)
+# Module 2
+fine_m2_1, fine_m2_2, fine_m2_3, fine_m2_4, fine_m2_5, fine_m2_6 = hex_to_bits(m2.detune_fine, 6)
+byte_07 = ToneByte(fine_m2_1, fine_m2_2, fine_m2_3, fine_m2_4, fine_m2_5, fine_m2_6, m2.pitch_fix, m2.range_width)
+octn_m2_1, octn_m2_2, octn_m2_3, octn_m2_4, octn_m2_5, octn_m2_6, octn_m2_7 = hex_to_bits(m2.detune_notes, 7)
+byte_08 = ToneByte(m2.polarity, octn_m2_1, octn_m2_2, octn_m2_3, octn_m2_4, octn_m2_5, octn_m2_6, octn_m2_7)
 
-m1_detune_notes = "1A"
-oct_note_m1_1, oct_note_m1_2, oct_note_m1_3, oct_note_m1_4, oct_note_m1_5, oct_note_m1_6, oct_note_m1_7 = hex_to_bits(m1_detune_notes, 7)
-byte_06 = ToneByte(m1_polarity, oct_note_m1_1, oct_note_m1_2, oct_note_m1_3, oct_note_m1_4, oct_note_m1_5, oct_note_m1_6, oct_note_m1_7)
-byte_07 = ToneByte
-byte_08 = ToneByte
-byte_09 = ToneByte
-byte_10 = ToneByte
-byte_11 = ToneByte
-byte_12 = ToneByte
-byte_13 = ToneByte
-byte_14 = ToneByte
-byte_15 = ToneByte
-byte_16 = ToneByte
-byte_17 = ToneByte
-byte_18 = ToneByte
-byte_19 = ToneByte
-byte_20 = ToneByte
+# Module 3
+fine_m3_1, fine_m3_2, fine_m3_3, fine_m3_4, fine_m3_5, fine_m3_6 = hex_to_bits(m3.detune_fine, 6)
+byte_09 = ToneByte(fine_m3_1, fine_m3_2, fine_m3_3, fine_m3_4, fine_m3_5, fine_m3_6, m3.pitch_fix, m3.range_width)
+octn_m3_1, octn_m3_2, octn_m3_3, octn_m3_4, octn_m3_5, octn_m3_6, octn_m3_7 = hex_to_bits(m3.detune_notes, 7)
+byte_10 = ToneByte(m3.polarity, octn_m3_1, octn_m3_2, octn_m3_3, octn_m3_4, octn_m3_5, octn_m3_6, octn_m3_7)
+
+# Module 4
+fine_m4_1, fine_m4_2, fine_m4_3, fine_m4_4, fine_m4_5, fine_m4_6 = hex_to_bits(m4.detune_fine, 6)
+byte_11 = ToneByte(fine_m4_1, fine_m4_2, fine_m4_3, fine_m4_4, fine_m4_5, fine_m4_6, m4.pitch_fix, m4.range_width)
+octn_m4_1, octn_m4_2, octn_m4_3, octn_m4_4, octn_m4_5, octn_m4_6, octn_m4_7 = hex_to_bits(m4.detune_notes, 7)
+byte_12 = ToneByte(m4.polarity, octn_m4_1, octn_m4_2, octn_m4_3, octn_m4_4, octn_m4_5, octn_m4_6, octn_m4_7)
+
+# Module 5
+fine_m5_1, fine_m5_2, fine_m5_3, fine_m5_4, fine_m5_5, fine_m5_6 = hex_to_bits(m5.detune_fine, 6)
+byte_13 = ToneByte(fine_m5_1, fine_m5_2, fine_m5_3, fine_m5_4, fine_m5_5, fine_m5_6, m5.pitch_fix, m5.range_width)
+octn_m5_1, octn_m5_2, octn_m5_3, octn_m5_4, octn_m5_5, octn_m5_6, octn_m5_7 = hex_to_bits(m5.detune_notes, 7)
+byte_14 = ToneByte(m5.polarity, octn_m5_1, octn_m5_2, octn_m5_3, octn_m5_4, octn_m5_5, octn_m5_6, octn_m5_7)
+
+# Module 6
+fine_m6_1, fine_m6_2, fine_m6_3, fine_m6_4, fine_m6_5, fine_m6_6 = hex_to_bits(m6.detune_fine, 6)
+byte_15 = ToneByte(fine_m6_1, fine_m6_2, fine_m6_3, fine_m6_4, fine_m6_5, fine_m6_6, m6.pitch_fix, m6.range_width)
+octn_m6_1, octn_m6_2, octn_m6_3, octn_m6_4, octn_m6_5, octn_m6_6, octn_m6_7 = hex_to_bits(m6.detune_notes, 7)
+byte_16 = ToneByte(m6.polarity, octn_m6_1, octn_m6_2, octn_m6_3, octn_m6_4, octn_m6_5, octn_m6_6, octn_m6_7)
+
+# Module 7
+fine_m7_1, fine_m7_2, fine_m7_3, fine_m7_4, fine_m7_5, fine_m7_6 = hex_to_bits(m7.detune_fine, 6)
+byte_17 = ToneByte(fine_m7_1, fine_m7_2, fine_m7_3, fine_m7_4, fine_m7_5, fine_m7_6, m7.pitch_fix, m7.range_width)
+octn_m7_1, octn_m7_2, octn_m7_3, octn_m7_4, octn_m7_5, octn_m7_6, octn_m7_7 = hex_to_bits(m7.detune_notes, 7)
+byte_18 = ToneByte(m7.polarity, octn_m7_1, octn_m7_2, octn_m7_3, octn_m7_4, octn_m7_5, octn_m7_6, octn_m7_7)
+
+# Module 8
+fine_m8_1, fine_m8_2, fine_m8_3, fine_m8_4, fine_m8_5, fine_m8_6 = hex_to_bits(m8.detune_fine, 6)
+byte_19 = ToneByte(fine_m8_1, fine_m8_2, fine_m8_3, fine_m8_4, fine_m8_5, fine_m8_6, m8.pitch_fix, m8.range_width)
+octn_m8_1, octn_m8_2, octn_m8_3, octn_m8_4, octn_m8_5, octn_m8_6, octn_m8_7 = hex_to_bits(m8.detune_notes, 7)
+byte_20 = ToneByte(m8.polarity, octn_m8_1, octn_m8_2, octn_m8_3, octn_m8_4, octn_m8_5, octn_m8_6, octn_m8_7)
+
