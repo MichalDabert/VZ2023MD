@@ -705,5 +705,55 @@ for i, module in enumerate(modules, start=156):
 pl_1, pl_2, pl_3, pl_4, pl_5, pl_6, pl_7 = hex_to_bits(voice.pitch_level_8, 7)
 byte_164 = ToneByte(voice.pitch_sus_8, pl_1, pl_2, pl_3, pl_4, pl_5, pl_6, pl_7, 164)
 
-# print(tone_internal[21:29])
+# bytes 165~172 amp envelope end step, amp sens
+for i, module in enumerate(modules, start=165):
+    env_end_step_1, env_end_step_2, env_end_step_3 = hex_to_bits(module.env_end_step, 3)
+    amp_sens_1, amp_sens_2, amp_sens_3 = hex_to_bits(module.amp_sens, 3)
+    byte_x = ToneByte(0, env_end_step_1, env_end_step_2, env_end_step_3, 0, amp_sens_1, amp_sens_2, amp_sens_3, i)
+
+# byte_173 pitch end step
+pitch_env_end_1, pitch_env_end_2, pitch_env_end_3 = hex_to_bits(voice.pitch_env_end, 3)
+byte_173 = ToneByte(0, pitch_env_end_1, pitch_env_end_2, pitch_env_end_3, 0, 0, 0, 0, 173)
+
+# byte_174 total level
+total_1,total_2, total_3, total_4, total_5, total_6,  total_7 = hex_to_bits(voice.total_level, 7)
+byte_174 = ToneByte(0, total_1, total_2, total_3, total_4, total_5, total_6 , total_7, 174)
+
+# bytes 175~182 amp env depth, module on/off
+for i, module in enumerate(modules, start=175):
+    envd_1, envd_2, envd_3, envd_4, envd_5, envd_6, envd_7 = hex_to_bits(module.env_depth, 7)
+    byte_x = ToneByte(module.module_active, envd_1, envd_2, envd_3, envd_4, envd_5, envd_6, envd_7, i)
+
+# byte 183 pitch env depth and range
+p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6 = hex_to_bits(voice.pitch_env_depth, 7)
+byte_183 = ToneByte(voice.pitch_range, 0, p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6, 183)
+print(len(tone_internal))
+
+# bytes 184~279 keyboard follow - amp level
+
+# bytes 280~291 keyboard follow - pitch level
+
+# bytes 292~303 keyboard follow - rate
+
+# bytes 304~313 velocity sensitivity
+
+# byte_314 vibrato, tone octave
+
+# byte_315 vibrato depth
+
+# byte_316 vibrato rate
+
+# byte_317 vibrato delay
+
+# byte_318 tremolo wave, multi
+
+# byte_319 tremolo depth
+
+# byte_320 tremolo rate
+
+# byte_321 tremolo delay
+
+# bytes 322~335 voice name
+
+# byte 336 checksum
 
