@@ -1,19 +1,42 @@
-""" This module includes functions for handling Voice and Module variables and combine them into a tone_internal list
+""" This module includes functions for handling Voice and Module variables and combines them into a tone_internal list
     of 335 bytes of voice patch data and a checksum """
 
 
 tone_internal = []
-for i in range(336):
+for i in range(337):
+    """
+    initializes a list of bytes.
+    """
     byte_num = str(i).zfill(2)
     byte_x = "byte_" + byte_num
     tone_internal.append(byte_x)
 print(tone_internal)
+
 """
 functions
 """
 
 
+def refresh_checksum(patch_data):
+    total = 0
+    for hex_value in patch_data:
+        value = int(hex_value, 16)
+        total += value
+        return total
+
+
 def bits_to_hex(b1, b2, b3, b4, b5, b6, b7, b8):
+    """
+    Calculates the hex value of 8 bits of data.
+
+    Args:
+        b1 (int): The first bit.
+        ~
+        b8 (int): The las number bit.
+
+    Returns:
+        hex: The hex value of arguments as bits
+    """
     bits = [1 if b else 0 for b in [b1, b2, b3, b4, b5, b6, b7, b8]]  # list comprehension
     decimal = int(''.join(map(str, bits)), 2)
     return hex(decimal)
@@ -165,12 +188,31 @@ midi_notes = {
 }
 
 """
+A dictionary that contains hex values of of notes.
+
+Keys:
+    -  (str): The name of the note
+
+Values:
+    -  (str): The hexadecimal value of the note.
+
+"""
+
+"""
 classes
 """
 
 
 class ToneByte:
+    """A class that creates a byte of VZ1 MIDI System Exclusive tone data."""
     def __init__(self, bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8, index):
+        """
+        Initializes a new instance of the ToneByte class.
+
+        Args:
+            bit_1 to bit_8: internal structure of tone data.
+            index: byte's position in the syx_messages["tone_data"].
+        """
         self.bit_1 = bit_1
         self.bit_2 = bit_2
         self.bit_3 = bit_3
@@ -186,13 +228,33 @@ class ToneByte:
         # tone_internal.insert(byte_number, self.hex_value) # add byteno variable and pass as arg?
 
 
-"""
-Variables not belonging to Module class, such as pitch keyboard follow, tremolo/vibrato
-"""
+class KbFollow:
+    """A class that represents 6 keyboard follow points."""
+    def __init__(self,
+                 p1_key=midi_notes["C0"], p1_level=0,
+                 p2_key=midi_notes["C1"], p2_level=0,
+                 p3_key=midi_notes["C2"], p3_level=0,
+                 p4_key=midi_notes["C3"], p4_level=0,
+                 p5_key=midi_notes["C4"], p5_level=0,
+                 p6_key=midi_notes["C5"], p6_level=0):
+        self.p1_key = p1_key
+        self.p1_level = p1_level
+        self.p2_key = p2_key
+        self.p2_level = p2_level
+        self.p3_key = p3_key
+        self.p3_level = p3_level
+        self.p4_key = p4_key
+        self.p4_level = p4_level
+        self.p5_key = p5_key
+        self.p5_level = p5_level
+        self.p6_key = p6_key
+        self.p6_level = p6_level
 
 
 class Voice:
+    """A class that represents tone parameters not governed by Modules."""
     def __init__(self,
+
                  m4_ext_phase=False, m6_ext_phase=False, m8_ext_phase=False,
                  line_a="mix", line_b="mix", line_c="mix", line_d="mix",
                  pitch_vel_rate_1=False, pitch_rate_1=0, pitch_sus_1=False, pitch_level_1=0,
@@ -203,7 +265,7 @@ class Voice:
                  pitch_vel_rate_6=False, pitch_rate_6=0, pitch_sus_6=False, pitch_level_6=0,
                  pitch_vel_rate_7=False, pitch_rate_7=0, pitch_sus_7=False, pitch_level_7=0,
                  pitch_vel_rate_8=False, pitch_rate_8=0, pitch_sus_8=False, pitch_level_8=0,
-                 pitch_env_end=0, total_level=0, pitch_range=False,  # False/0/ Narrow
+                 pitch_env_end=0, total_level=0, pitch_curve=0, pitch_vel_sens=0, pitch_range=False,  # False/0/ Narrow
                  pitch_env_depth=0,
                  kb_follow_pitch_key_1=midi_notes["C0"], kb_follow_pitch_level_1=0,
                  kb_follow_pitch_key_2=midi_notes["C1"], kb_follow_pitch_level_2=0,
@@ -218,14 +280,20 @@ class Voice:
                  rate_kb_follow_key_5=midi_notes["C5"], rate_kb_follow_rate_5=0,
                  rate_kb_follow_key_6=midi_notes["C6"], rate_kb_follow_rate_6=0,
                  octave_pol=False, octave_no=0,
-                 vib_multi=False,vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
-                 trm_multi=False,trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
+                 vib_multi=False, vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
+                 trm_multi=False, trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
                  voice_name="initVZ2023MD"):
+        """
+        Initializes a new instance of init tone of 8 sine waves, output mixed, max level, no release.
+
+        Args:
+            line_a etc.: Modules are grouped into 4 lines a~d.
+            m4_ext_phase etc.: Modules m4, m6, and m8 may have their phase distorted by the line above.
+        """
 
         self.m4_ext_phase = m4_ext_phase
         self.m6_ext_phase = m6_ext_phase
         self.m8_ext_phase = m8_ext_phase
-
 
         # line, waveform ERROR IN MANUAL PAGE 9. WRONG MODULE WAVEFORM NUMBERING
         lines = {"mix": (0, 0), "phase": (0, 1), "ring": (1, 1)}
@@ -277,6 +345,9 @@ class Voice:
 
         self.pitch_env_end = pitch_env_end
         self.total_level = total_level
+
+        self.pitch_curve = pitch_curve
+        self.pitch_vel_sens = pitch_vel_sens
         self.pitch_range = pitch_range
         self.pitch_env_depth = pitch_env_depth
 
@@ -334,15 +405,11 @@ class Voice:
         self.voice_name = voice_name
 
 
-
-
-"""
-reusable Module for M1~M8
-"""
-
-
 class Module:
-    def __init__(self, waveform="sine", detune_fine=0, pitch_fix=False, range_width=False, polarity=True, detune_notes=0,
+    def __init__(self, waveform="sine",
+                 detune_fine=0,
+                 pitch_fix=False, range_width=False, polarity=True,
+                 detune_notes=0,
                  vel_rate_1=False, rate_1=0, sus_1=False, level_1=0,
                  vel_rate_2=False, rate_2=0, sus_2=False, level_2=0,
                  vel_rate_3=False, rate_3=0, sus_3=False, level_3=0,
@@ -436,6 +503,7 @@ class Module:
         self.vel_curve = vel_curve
         self.vel_sens = vel_sens
 
+
 """
 initialized voice and 8 modules with default values
 """
@@ -465,7 +533,11 @@ waveforms = {"sine": (0, 0, 0),
              "saw_4": (1, 0, 0),
              "saw_5": (1, 0, 1),
              "noise_1": (1, 1, 0),
-             "noise_2": (1, 1, 1)}
+             "noise_2": (1, 1, 1),
+             "triangle": (0, 0),
+             "saw_up": (0, 1),
+             "saw_down": (1, 0),
+             "square": (1, 1), }
 
 
 wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform)
@@ -486,13 +558,7 @@ byte_03 = ToneByte(voice.line_c1, voice.line_c2, wave_m6_1, wave_m6_2, wave_m6_3
 
 byte_04 = ToneByte(voice.line_d1, voice.line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1, wave_m7_2, wave_m7_3, 4)
 
-
-
-
-
-
-
-# detuning, in pairs of bytes 5-20
+# detune, in pairs of bytes 5-20
 
 # Module 1
 fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6 = hex_to_bits(m1.detune_fine, 6)
@@ -716,8 +782,8 @@ pitch_env_end_1, pitch_env_end_2, pitch_env_end_3 = hex_to_bits(voice.pitch_env_
 byte_173 = ToneByte(0, pitch_env_end_1, pitch_env_end_2, pitch_env_end_3, 0, 0, 0, 0, 173)
 
 # byte_174 total level
-total_1,total_2, total_3, total_4, total_5, total_6,  total_7 = hex_to_bits(voice.total_level, 7)
-byte_174 = ToneByte(0, total_1, total_2, total_3, total_4, total_5, total_6 , total_7, 174)
+total_1, total_2, total_3, total_4, total_5, total_6,  total_7 = hex_to_bits(voice.total_level, 7)
+byte_174 = ToneByte(0, total_1, total_2, total_3, total_4, total_5, total_6, total_7, 174)
 
 # bytes 175~182 amp env depth, module on/off
 for i, module in enumerate(modules, start=175):
@@ -735,26 +801,57 @@ byte_183 = ToneByte(voice.pitch_range, 0, p_env_d_1, p_env_d_2, p_env_d_3, p_env
 
 # bytes 292~303 keyboard follow - rate
 
-# bytes 304~313 velocity sensitivity
+# bytes 304~311 velocity sensitivity
+for i, module in enumerate(modules, start=304):
+    curve_1, curve_2, curve_3 = hex_to_bits(module.vel_curve, 3)
+    vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5 = hex_to_bits(module.vel_sens, 5)
+    byte_x = ToneByte(curve_1, curve_2, curve_3, vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5, i)
+
+# byte 312 pitch velocity curve, sense
+curve_1, curve_2, curve_3 = hex_to_bits(voice.pitch_curve, 3)
+vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5 = hex_to_bits(voice.pitch_vel_sens, 5)
+byte_312 = ToneByte(curve_1, curve_2, curve_3, vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5, 312)
+
 
 # byte_314 vibrato, tone octave
+octave_1, octave_2 = hex_to_bits(voice.octave_no, 2)
+vib_wave_1, vib_wave_2 = waveforms.get(voice.vib_wave)
+byte_314 = ToneByte(voice.octave_pol, octave_1, octave_2, 0, voice.vib_multi, 0, vib_wave_1, vib_wave_2, 314)
 
 # byte_315 vibrato depth
+vib_dpth_1, vib_dpth_2, vib_dpth_3, vib_dpth_4, vib_dpth_5, vib_dpth_6,  vib_dpth_7 = hex_to_bits(voice.vib_depth, 7)
+byte_315 = ToneByte(0, vib_dpth_1, vib_dpth_2, vib_dpth_3, vib_dpth_4, vib_dpth_5, vib_dpth_6, vib_dpth_7, 315)
 
 # byte_316 vibrato rate
+vib_rte_1, vib_rte_2, vib_rte_3, vib_rte_4, vib_rte_5, vib_rte_6,  vib_rte_7 = hex_to_bits(voice.vib_rate, 7)
+byte_316 = ToneByte(0, vib_rte_1, vib_rte_2, vib_rte_3, vib_rte_4, vib_rte_5, vib_rte_6, vib_rte_7, 316)
 
 # byte_317 vibrato delay
+vib_dly_1, vib_dly_2, vib_dly_3, vib_dly_4, vib_dly_5, vib_dly_6,  vib_dly_7 = hex_to_bits(voice.vib_delay, 7)
+byte_317 = ToneByte(0, vib_dly_1, vib_dly_2, vib_dly_3, vib_dly_4, vib_dly_5, vib_dly_6, vib_dly_7, 317)
 
 # byte_318 tremolo wave, multi
+trm_wave_1, trm_wave_2,  = waveforms.get(voice.trm_wave)
+byte_318 = ToneByte(0, 0, 0, 0, voice.trm_multi, 0,  trm_wave_1, trm_wave_2, 318)
 
 # byte_319 tremolo depth
+trm_dpth_1, trm_dpth_2, trm_dpth_3, trm_dpth_4, trm_dpth_5, trm_dpth_6,  trm_dpth_7 = hex_to_bits(voice.trm_depth, 7)
+byte_319 = ToneByte(0, trm_dpth_1, trm_dpth_2, trm_dpth_3, trm_dpth_4, trm_dpth_5, trm_dpth_6, trm_dpth_7, 319)
 
 # byte_320 tremolo rate
+trm_rte_1, trm_rte_2, trm_rte_3, trm_rte_4, trm_rte_5, trm_rte_6,  trm_rte_7 = hex_to_bits(voice.trm_rate, 7)
+byte_320 = ToneByte(0, trm_rte_1, trm_rte_2, trm_rte_3, trm_rte_4, trm_rte_5, trm_rte_6, trm_rte_7, 320)
 
 # byte_321 tremolo delay
+trm_dly_1, trm_dly_2, trm_dly_3, trm_dly_4, trm_dly_5, trm_dly_6,  trm_dly_7 = hex_to_bits(voice.trm_delay, 7)
+byte_321 = ToneByte(0, trm_dly_1, trm_dly_2, trm_dly_3, trm_dly_4, trm_dly_5, trm_dly_6, trm_dly_7, 321)
 
 # bytes 322~335 voice name
-
+...
 # byte 336 checksum
 
-print(tone_internal)
+byte_336 = refresh_checksum(tone_internal)  # should start working if all values are present
+
+
+
+print(len(tone_internal))
