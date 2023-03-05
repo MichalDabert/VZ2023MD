@@ -725,9 +725,9 @@ for i, module in enumerate(modules, start=175):
     byte_x = ToneByte(module.module_active, envd_1, envd_2, envd_3, envd_4, envd_5, envd_6, envd_7, i)
 
 # byte 183 pitch env depth and range
-p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6 = hex_to_bits(voice.pitch_env_depth, 7)
+p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6 = hex_to_bits(voice.pitch_env_depth, 6)
 byte_183 = ToneByte(voice.pitch_range, 0, p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6, 183)
-print(len(tone_internal))
+
 
 # bytes 184~279 keyboard follow - amp level
 
@@ -757,3 +757,4 @@ print(len(tone_internal))
 
 # byte 336 checksum
 
+print(tone_internal)
