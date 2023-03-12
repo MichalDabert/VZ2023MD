@@ -1,5 +1,5 @@
 """ This module includes functions for handling Voice and Module variables and combines them into a tone_internal list
-    of 335 bytes of voice patch data and a checksum """
+    of 333 bytes of voice patch data, 2 bytes of data equal to 0x20, and a checksum """
 
 
 tone_internal = []
@@ -17,12 +17,42 @@ functions
 """
 
 
-def refresh_checksum(patch_data):
-    total = 0
-    for hex_value in patch_data:
-        value = int(hex_value, 16)
-        total += value
-        return total
+def ascii_to_hex(s):
+    """
+        Takes a string of up to 12 characters and returns their ascii values in hexadecimal format.
+        Pads the remaining character slots with zeroes.
+
+        Args:
+            s (string): a string of up to 12 characters
+
+        Returns:
+            list: a list of ascii values in hexadecimal format
+        """
+    hex_values = []
+    for char in range(12):
+        if char < len(s):
+            hex_values.append(hex(ord(s[char])))
+        else:
+            hex_values.append(hex(0))
+    return hex_values
+
+
+
+def calculate_checksum(sysex_data):
+    """
+    Calculates 7 bit checksum.
+
+    Args:
+        sysex_data (list): a list of hexadecimal values
+
+    Returns:
+        hex: hexadecimal checksum
+    """
+    new_checksum = 0
+    for i in range(0, len(sysex_data), 2):
+        new_checksum += int(sysex_data[i], 16) * 16 + int(sysex_data[i + 1], 16)
+    return (128 - new_checksum % 128) % 128
+
 
 
 def bits_to_hex(b1, b2, b3, b4, b5, b6, b7, b8):
@@ -265,20 +295,9 @@ class Voice:
                  pitch_vel_rate_6=False, pitch_rate_6=0, pitch_sus_6=False, pitch_level_6=0,
                  pitch_vel_rate_7=False, pitch_rate_7=0, pitch_sus_7=False, pitch_level_7=0,
                  pitch_vel_rate_8=False, pitch_rate_8=0, pitch_sus_8=False, pitch_level_8=0,
-                 pitch_env_end=0, total_level=0, pitch_curve=0, pitch_vel_sens=0, pitch_range=False,  # False/0/ Narrow
+                 pitch_env_end=0, total_level=0, pitch_curve=0, pitch_vel_sens=0,
+                 rate_vel_curve=0, rate_vel_sens=0, pitch_range=False,  # False/0/ Narrow
                  pitch_env_depth=0,
-                 kb_follow_pitch_key_1=midi_notes["C0"], kb_follow_pitch_level_1=0,
-                 kb_follow_pitch_key_2=midi_notes["C1"], kb_follow_pitch_level_2=0,
-                 kb_follow_pitch_key_3=midi_notes["C2"], kb_follow_pitch_level_3=0,
-                 kb_follow_pitch_key_4=midi_notes["C3"], kb_follow_pitch_level_4=0,
-                 kb_follow_pitch_key_5=midi_notes["C4"], kb_follow_pitch_level_5=0,
-                 kb_follow_pitch_key_6=midi_notes["C5"], kb_follow_pitch_level_6=0,
-                 rate_kb_follow_key_1=midi_notes["C1"], rate_kb_follow_rate_1=0,
-                 rate_kb_follow_key_2=midi_notes["C2"], rate_kb_follow_rate_2=0,
-                 rate_kb_follow_key_3=midi_notes["C3"], rate_kb_follow_rate_3=0,
-                 rate_kb_follow_key_4=midi_notes["C4"], rate_kb_follow_rate_4=0,
-                 rate_kb_follow_key_5=midi_notes["C5"], rate_kb_follow_rate_5=0,
-                 rate_kb_follow_key_6=midi_notes["C6"], rate_kb_follow_rate_6=0,
                  octave_pol=False, octave_no=0,
                  vib_multi=False, vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
                  trm_multi=False, trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
@@ -348,44 +367,14 @@ class Voice:
 
         self.pitch_curve = pitch_curve
         self.pitch_vel_sens = pitch_vel_sens
+
+        self.rate_vel_curve = rate_vel_curve
+        self.rate_vel_sens = rate_vel_sens
         self.pitch_range = pitch_range
         self.pitch_env_depth = pitch_env_depth
 
-        self.kb_follow_pitch_key_1 = kb_follow_pitch_key_1
-        self.kb_follow_pitch_level_1 = kb_follow_pitch_level_1
-
-        self.kb_follow_pitch_key_2 = kb_follow_pitch_key_2
-        self.kb_follow_pitch_level_2 = kb_follow_pitch_level_2
-
-        self.kb_follow_pitch_key_3 = kb_follow_pitch_key_3
-        self.kb_follow_pitch_level_3 = kb_follow_pitch_level_3
-
-        self.kb_follow_pitch_key_4 = kb_follow_pitch_key_4
-        self.kb_follow_pitch_level_4 = kb_follow_pitch_level_4
-
-        self.kb_follow_pitch_key_5 = kb_follow_pitch_key_5
-        self.kb_follow_pitch_level_5 = kb_follow_pitch_level_5
-
-        self.kb_follow_pitch_key_6 = kb_follow_pitch_key_6
-        self.kb_follow_pitch_level_6 = kb_follow_pitch_level_6
-
-        self.rate_kb_follow_key_1 = rate_kb_follow_key_1
-        self.rate_kb_follow_rate_1 = rate_kb_follow_rate_1
-
-        self.rate_kb_follow_key_2 = rate_kb_follow_key_2
-        self.rate_kb_follow_rate_2 = rate_kb_follow_rate_2
-
-        self.rate_kb_follow_key_3 = rate_kb_follow_key_3
-        self.rate_kb_follow_rate_3 = rate_kb_follow_rate_3
-
-        self.rate_kb_follow_key_4 = rate_kb_follow_key_4
-        self.rate_kb_follow_rate_4 = rate_kb_follow_rate_4
-
-        self.rate_kb_follow_key_5 = rate_kb_follow_key_5
-        self.rate_kb_follow_rate_5 = rate_kb_follow_rate_5
-
-        self.rate_kb_follow_key_6 = rate_kb_follow_key_6
-        self.rate_kb_follow_rate_6 = rate_kb_follow_rate_6
+        self.kb_follow_pitch = KbFollow()
+        self.kb_follow_mod_rate = KbFollow()
 
         self.octave_pol = octave_pol
         self.octave_no = octave_no
@@ -421,13 +410,7 @@ class Module:
                  amp_sens=0, env_end_step=0,
                  module_active=False,  # 0/False/ = module on
                  env_depth=0,
-                 kb_follow_amp_key_1=0, kb_follow_amp_level_1=0,
-                 kb_follow_amp_key_2=0, kb_follow_amp_level_2=0,
-                 kb_follow_amp_key_3=0, kb_follow_amp_level_3=0,
-                 kb_follow_amp_key_4=0, kb_follow_amp_level_4=0,
-                 kb_follow_amp_key_5=0, kb_follow_amp_level_5=0,
-                 kb_follow_amp_key_6=0, kb_follow_amp_level_6=0,
-                 vel_curve=0, vel_sens=0):
+                 vel_curve=0, vel_sens=0,):
 
         self.waveform = waveform
         self.detune_fine = detune_fine
@@ -482,23 +465,8 @@ class Module:
         self.module_active = module_active
         self.env_depth = env_depth
 
-        self.kb_follow_amp_key_1 = kb_follow_amp_key_1
-        self.kb_follow_amp_level_1 = kb_follow_amp_level_1
+        self.level_kb_follow = KbFollow()
 
-        self.kb_follow_amp_key_2 = kb_follow_amp_key_2
-        self.kb_follow_amp_level_2 = kb_follow_amp_level_2
-
-        self.kb_follow_amp_key_3 = kb_follow_amp_key_3
-        self.kb_follow_amp_level_3 = kb_follow_amp_level_3
-
-        self.kb_follow_amp_key_4 = kb_follow_amp_key_4
-        self.kb_follow_amp_level_4 = kb_follow_amp_level_4
-
-        self.kb_follow_amp_key_5 = kb_follow_amp_key_5
-        self.kb_follow_amp_level_5 = kb_follow_amp_level_5
-
-        self.kb_follow_amp_key_6 = kb_follow_amp_key_6
-        self.kb_follow_amp_level_6 = kb_follow_amp_level_6
 
         self.vel_curve = vel_curve
         self.vel_sens = vel_sens
@@ -518,6 +486,11 @@ m5 = Module()
 m6 = Module()
 m7 = Module()
 m8 = Module()
+
+
+level_kbfollow_amp = KbFollow()
+level_kbfollow_pitch = KbFollow()
+rate_kbfollow = KbFollow()
 
 """
 bytes of data formatted according to VZ-1/VZ-10m MIDI System Exclusive Format
@@ -795,11 +768,319 @@ p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6 = hex_to_bits(v
 byte_183 = ToneByte(voice.pitch_range, 0, p_env_d_1, p_env_d_2, p_env_d_3, p_env_d_4, p_env_d_5, p_env_d_6, 183)
 
 
-# bytes 184~279 keyboard follow - amp level
+ #bytes 184~279 keyboard follow - amp level
 
-# bytes 280~291 keyboard follow - pitch level
+# Module 1
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p1_key, 7)
+byte_184 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 184)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p1_level, 7)
+byte_185 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 185)
 
-# bytes 292~303 keyboard follow - rate
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p2_key, 7)
+byte_186 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 186)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p2_level, 7)
+byte_187 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 187)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p3_key, 7)
+byte_188 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 188)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p3_level, 7)
+byte_189 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 189)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p4_key, 7)
+byte_190 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 190)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p4_level, 7)
+byte_191 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 191)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p5_key, 7)
+byte_192 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 192)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p5_level, 7)
+byte_193 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 193)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p6_key, 7)
+byte_194 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 194)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m1.level_kb_follow.p6_level, 7)
+byte_195 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 195)
+
+# Module 2
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p1_key, 7)
+byte_196 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 196)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p1_level, 7)
+byte_197 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 197)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p2_key, 7)
+byte_198 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 198)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p2_level, 7)
+byte_199 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 199)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p3_key, 7)
+byte_200 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 200)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p3_level, 7)
+byte_201 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 201)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p4_key, 7)
+byte_202 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 202)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p4_level, 7)
+byte_203 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 203)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p5_key, 7)
+byte_204 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 204)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p5_level, 7)
+byte_205 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 205)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p6_key, 7)
+byte_206 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 206)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m2.level_kb_follow.p6_level, 7)
+byte_207 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 207)
+
+# Module 3
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p1_key, 7)
+byte_208 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 208)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p1_level, 7)
+byte_209 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 209)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p2_key, 7)
+byte_210 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 210)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p2_level, 7)
+byte_211 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 211)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p3_key, 7)
+byte_212 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 212)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p3_level, 7)
+byte_213 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 213)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p4_key, 7)
+byte_214 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 214)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p4_level, 7)
+byte_215 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 215)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p5_key, 7)
+byte_216 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 216)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p5_level, 7)
+byte_217 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 217)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p6_key, 7)
+byte_218 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 218)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m3.level_kb_follow.p6_level, 7)
+byte_219 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 219)
+
+# Module 4
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p1_key, 7)
+byte_220 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 220)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p1_level, 7)
+byte_221 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 221)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p2_key, 7)
+byte_222 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 222)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p2_level, 7)
+byte_223 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 223)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p3_key, 7)
+byte_224 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 224)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p3_level, 7)
+byte_225 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 225)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p4_key, 7)
+byte_226 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 226)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p4_level, 7)
+byte_227 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 227)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p5_key, 7)
+byte_228 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 228)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p5_level, 7)
+byte_229 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 229)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p6_key, 7)
+byte_230 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 230)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m4.level_kb_follow.p6_level, 7)
+byte_231 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 231)
+
+# Module 5
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p1_key, 7)
+byte_232 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 232)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p1_level, 7)
+byte_233 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 233)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p2_key, 7)
+byte_234 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 234)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p2_level, 7)
+byte_235 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 235)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p3_key, 7)
+byte_236 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 236)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p3_level, 7)
+byte_237 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 237)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p4_key, 7)
+byte_238 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 238)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p4_level, 7)
+byte_239 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 239)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p5_key, 7)
+byte_240 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 240)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p5_level, 7)
+byte_241 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 241)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p6_key, 7)
+byte_242 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 242)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m5.level_kb_follow.p6_level, 7)
+byte_243 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 243)
+
+# Module 6
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p1_key, 7)
+byte_244 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 244)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p1_level, 7)
+byte_245 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 245)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p2_key, 7)
+byte_246 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 246)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p2_level, 7)
+byte_247 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 247)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p3_key, 7)
+byte_248 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 248)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p3_level, 7)
+byte_249 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 249)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p4_key, 7)
+byte_250 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 250)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p4_level, 7)
+byte_251 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 251)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p5_key, 7)
+byte_252 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 252)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p5_level, 7)
+byte_253 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 253)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p6_key, 7)
+byte_254 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 254)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m6.level_kb_follow.p6_level, 7)
+byte_255 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 255)
+
+# Module 7
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p1_key, 7)
+byte_256 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 256)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p1_level, 7)
+byte_257 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 257)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p2_key, 7)
+byte_258 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 258)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p2_level, 7)
+byte_259 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 259)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p3_key, 7)
+byte_260 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 260)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p3_level, 7)
+byte_261 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 261)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p4_key, 7)
+byte_262 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 262)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p4_level, 7)
+byte_263 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 263)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p5_key, 7)
+byte_264 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 264)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p5_level, 7)
+byte_265 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 265)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p6_key, 7)
+byte_266 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 266)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m7.level_kb_follow.p6_level, 7)
+byte_267 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 267)
+
+# Module 8
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p1_key, 7)
+byte_268 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 268)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p1_level, 7)
+byte_269 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 269)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p2_key, 7)
+byte_270 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 270)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p2_level, 7)
+byte_271 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 271)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p3_key, 7)
+byte_272 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 272)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p3_level, 7)
+byte_273 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 273)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p4_key, 7)
+byte_274 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 274)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p4_level, 7)
+byte_275 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 275)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p5_key, 7)
+byte_276 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 276)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p5_level, 7)
+byte_277 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 277)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p6_key, 7)
+byte_278 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 278)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(m8.level_kb_follow.p6_level, 7)
+byte_279 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 279)
+
+#bytes 280~291 keyboard follow - pitch level
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p1_key, 7)
+byte_280 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 280)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p1_level, 7)
+byte_281 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 281)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p2_key, 7)
+byte_282 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 282)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p2_level, 7)
+byte_283 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 283)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p3_key, 7)
+byte_284 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 284)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p3_level, 7)
+byte_285 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 285)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p4_key, 7)
+byte_286 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 286)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p4_level, 7)
+byte_287 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 287)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p5_key, 7)
+byte_288 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 288)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p5_level, 7)
+byte_289 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 289)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p6_key, 7)
+byte_290 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 290)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_pitch.p6_level, 7)
+byte_291 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 291)
+
+#bytes 292~303 keyboard follow - rate
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p1_key, 7)
+byte_292 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 292)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p1_level, 7)
+byte_293 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 293)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p2_key, 7)
+byte_294 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 294)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p2_level, 7)
+byte_295 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 295)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p3_key, 7)
+byte_296 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 296)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p3_level, 7)
+byte_297 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 297)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p4_key, 7)
+byte_298 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 298)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p4_level, 7)
+byte_299 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 299)
+
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p5_key, 7)
+byte_300 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 300)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p5_level, 7)
+byte_301 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 301)
+
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p6_key, 7)
+byte_302 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 302)
+b1, b2, b3, b4, b5, b6, b7 = hex_to_bits(voice.kb_follow_mod_rate.p6_level, 7)
+byte_303 = ToneByte(0, b1, b2, b3, b4, b5, b6, b7, 303)
+
 
 # bytes 304~311 velocity sensitivity
 for i, module in enumerate(modules, start=304):
@@ -812,6 +1093,10 @@ curve_1, curve_2, curve_3 = hex_to_bits(voice.pitch_curve, 3)
 vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5 = hex_to_bits(voice.pitch_vel_sens, 5)
 byte_312 = ToneByte(curve_1, curve_2, curve_3, vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5, 312)
 
+# byte 313 rate of pitch velocity curve, sense
+curve_1, curve_2, curve_3 = hex_to_bits(voice.rate_vel_curve, 3)
+vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5 = hex_to_bits(voice.rate_vel_sens, 5)
+byte_313 = ToneByte(curve_1, curve_2, curve_3, vel_sens_1, vel_sens_2, vel_sens_3, vel_sens_4, vel_sens_5, 313)
 
 # byte_314 vibrato, tone octave
 octave_1, octave_2 = hex_to_bits(voice.octave_no, 2)
@@ -846,12 +1131,27 @@ byte_320 = ToneByte(0, trm_rte_1, trm_rte_2, trm_rte_3, trm_rte_4, trm_rte_5, tr
 trm_dly_1, trm_dly_2, trm_dly_3, trm_dly_4, trm_dly_5, trm_dly_6,  trm_dly_7 = hex_to_bits(voice.trm_delay, 7)
 byte_321 = ToneByte(0, trm_dly_1, trm_dly_2, trm_dly_3, trm_dly_4, trm_dly_5, trm_dly_6, trm_dly_7, 321)
 
-# bytes 322~335 voice name
-...
+# bytes 322~333 voice name
+c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, c_9, c_10, c_11, c_12, = ascii_to_hex(voice.voice_name)
+byte_322 = c_1
+byte_323 = c_2
+byte_324 = c_3
+byte_325 = c_4
+byte_326 = c_5
+byte_327 = c_6
+byte_328 = c_7
+byte_329 = c_8
+byte_330 = c_9
+byte_331 = c_10
+byte_332 = c_11
+byte_333 = c_12
+byte_334 = 0x20  # value for 'spacebar', needed for the checksum
+byte_335 = 0x20  # value for 'spacebar', needed for the checksum
+
 # byte 336 checksum
+byte_336 = calculate_checksum(tone_internal)
 
-byte_336 = refresh_checksum(tone_internal)  # should start working if all values are present
+print(tone_internal)
+print(...)
 
-
-
-print(len(tone_internal))
+#print(byte_336)
