@@ -1153,7 +1153,10 @@ print(tone_internal)
 print("tone internal length:", len(tone_internal))
 print("checksum:", tone_checksum)
 
-for data in tone_internal:
-    data = int(data, 16)
-    #print(type(data))
+ints = []
+for hex_str in tone_internal:
+    # Convert hexadecimal string to integer and append to list
+    ints.append(int(hex_str, 16))
+
+
 

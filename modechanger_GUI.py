@@ -101,8 +101,9 @@ voice_slots = {
     "Tone_4": 44,  # Compare/Recall slot 4
 }
 
+
 syx_messages = {  # MIDI system exclusive
-    "tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, 0x40, tonedata.tone_internal, 0xF7],
+    "tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, 0x40],
     #"opme_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x01, voice_slots["normal"], opme_data, opme_checksum, 0xF7], # default voice slot 40 sound area ??
     #"mltch_data" : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x02, 0x00, mltch_data, mltch_checksum, 0xF7],
 
@@ -140,6 +141,10 @@ syx_messages = {  # MIDI system exclusive
     "ok"         : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x72, 0xF7],
     "error"      : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x73, 0xF7],
     }
+
+syx_messages["tone_data"].extend(tonedata.ints)
+syx_messages["tone_data"].append(0xF7)
+print(syx_messages["tone_data"])
 
 
 """
