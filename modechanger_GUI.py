@@ -2,6 +2,7 @@ import rtmidi
 from PySide6 import QtGui
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, QSlider, QLabel, QDialog
+import tonedata
 
 #from qt_material import apply_stylesheet
 
@@ -101,7 +102,7 @@ voice_slots = {
 }
 
 syx_messages = {  # MIDI system exclusive
-    #"tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, voice_slots["normal"], tone_internal, tone_checksum, 0xF7],
+    "tone_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x00, 0x40, tonedata.tone_internal, 0xF7],
     #"opme_data"  : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x01, voice_slots["normal"], opme_data, opme_checksum, 0xF7], # default voice slot 40 sound area ??
     #"mltch_data" : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x02, 0x00, mltch_data, mltch_checksum, 0xF7],
 
@@ -230,6 +231,9 @@ Buttons
 
 button_height = 50
 
+tone_button = QPushButton("Send Tone")
+tone_button.clicked.connect(lambda: send_syx("tone_data"))
+
 master_button = QPushButton("Tune to A4=440Hz")
 master_button.clicked.connect(lambda: send_syx("master_tune"))
 
@@ -296,6 +300,7 @@ main_layout.addLayout(layout4)
 top_box.addWidget(transpose_selector)
 top_box.addWidget(bend_slider)
 top_box.addWidget(bend_label)
+top_box.addWidget(tone_button)
 top_box.addWidget(master_button)
 top_box.addWidget(normal_button)
 top_box.addWidget(combin_button)
