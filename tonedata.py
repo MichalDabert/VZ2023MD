@@ -3,7 +3,7 @@
 
 
 tone_internal = []
-for i in range(337):
+for i in range(336):
     """
     initializes a list of bytes.
     """
@@ -1133,25 +1133,52 @@ byte_321 = ToneByte(0, trm_dly_1, trm_dly_2, trm_dly_3, trm_dly_4, trm_dly_5, tr
 
 # bytes 322~333 voice name
 c_1, c_2, c_3, c_4, c_5, c_6, c_7, c_8, c_9, c_10, c_11, c_12, = ascii_to_hex(voice.voice_name)
-byte_322 = c_1
-byte_323 = c_2
-byte_324 = c_3
-byte_325 = c_4
-byte_326 = c_5
-byte_327 = c_6
-byte_328 = c_7
-byte_329 = c_8
-byte_330 = c_9
-byte_331 = c_10
-byte_332 = c_11
-byte_333 = c_12
-byte_334 = 0x20  # value for 'spacebar', needed for the checksum
-byte_335 = 0x20  # value for 'spacebar', needed for the checksum
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_1, 8)
+byte_322 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 322)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_2, 8)
+byte_323 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 323)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_3, 8)
+byte_324 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 324)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_4, 8)
+byte_325 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 325)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_5, 8)
+byte_326 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 326)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_6, 8)
+byte_327 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 327)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_7, 8)
+byte_328 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 328)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_8, 8)
+byte_329 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 329)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_9, 8)
+byte_330 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 330)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_10, 8)
+byte_331 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 331)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_11, 8)
+byte_332 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 332)
+
+l1, l2, l3, l4, l5, l6, l7, l8 = hex_to_bits(c_12, 8)
+byte_333 = ToneByte(l1, l2, l3, l4, l5, l6, l7, l8, 333)
+
+byte_334 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 334)
+byte_335 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 335)
+
+
+for index, data in enumerate(tone_internal):
+    print(index, data)
+    print(type(data))
+
 
 # byte 336 checksum
 byte_336 = calculate_checksum(tone_internal)
 
-print(tone_internal)
-print(...)
-
-#print(byte_336)
