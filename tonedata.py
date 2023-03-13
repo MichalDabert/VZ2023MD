@@ -1,16 +1,25 @@
 """ This module includes functions for handling Voice and Module variables and combines them into a tone_internal list
     of 333 bytes of voice patch data, 2 bytes of data equal to 0x20, and a checksum """
 
-
 tone_internal = []
+for i in range(673):
+    """
+    initializes a list of double nibbles.
+    """
+    byte_num = str(i).zfill(2)
+    byte_x = "byte_" + byte_num
+    tone_internal.append(byte_x)
+print(tone_internal)
+
+
+checksummable = []
 for i in range(337):
     """
     initializes a list of bytes.
     """
     byte_num = str(i).zfill(2)
     byte_x = "byte_" + byte_num
-    tone_internal.append(byte_x)
-print(tone_internal)
+    checksummable.append(byte_x)
 
 """
 functions
@@ -35,6 +44,7 @@ def ascii_to_hex(s):
         else:
             hex_values.append(hex(0))
     return hex_values
+
 
 
 
@@ -228,6 +238,29 @@ Values:
 
 """
 
+waveforms = {"sine": (0, 0, 0),
+             "saw_1": (0, 0, 1),
+             "saw_2": (0, 1, 0),
+             "saw_3": (0, 1, 1),
+             "saw_4": (1, 0, 0),
+             "saw_5": (1, 0, 1),
+             "noise_1": (1, 1, 0),
+             "noise_2": (1, 1, 1),
+             "triangle": (0, 0),
+             "saw_up": (0, 1),
+             "saw_down": (1, 0),
+             "square": (1, 1), }
+"""
+A dictionary that contains waveforms for modules, tremolo and vibrato.
+
+Keys:
+    -  (str): The name of the waveforms.
+
+Values:
+    -  (tuple): Internal bit structure of the data.
+
+"""
+
 """
 classes
 """
@@ -243,17 +276,23 @@ class ToneByte:
             bit_1 to bit_8: internal structure of tone data.
             index: byte's position in the syx_messages["tone_data"].
         """
+
         self.bit_1 = bit_1
         self.bit_2 = bit_2
         self.bit_3 = bit_3
         self.bit_4 = bit_4
+        self.hex_value_upper = bits_to_hex(0, 0, 0, 0, bit_1, bit_2, bit_3, bit_4)
         self.bit_5 = bit_5
         self.bit_6 = bit_6
         self.bit_7 = bit_7
         self.bit_8 = bit_8
-        self.hex_value = bits_to_hex(bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8)
+        self.hex_value_lower = bits_to_hex(0, 0, 0, 0, bit_5, bit_6, bit_7, bit_8)
 
-        tone_internal[index] = self.hex_value
+        self.checksum_hex_value = bits_to_hex(bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8)
+
+        tone_internal[2 * index] = self.hex_value_upper
+        tone_internal[2* index +1] = self.hex_value_lower
+        checksummable[index] = self.checksum_hex_value
         # print(self.hex_value)
         # tone_internal.insert(byte_number, self.hex_value) # add byteno variable and pass as arg?
 
@@ -496,43 +535,30 @@ rate_kbfollow = KbFollow()
 bytes of data formatted according to VZ-1/VZ-10m MIDI System Exclusive Format
 """
 
+# byte 0
 byte_0 = ToneByte(0, 0, 0, 0, 0, voice.m8_ext_phase, voice.m6_ext_phase, voice.m4_ext_phase, 0)
 
-
-waveforms = {"sine": (0, 0, 0),
-             "saw_1": (0, 0, 1),
-             "saw_2": (0, 1, 0),
-             "saw_3": (0, 1, 1),
-             "saw_4": (1, 0, 0),
-             "saw_5": (1, 0, 1),
-             "noise_1": (1, 1, 0),
-             "noise_2": (1, 1, 1),
-             "triangle": (0, 0),
-             "saw_up": (0, 1),
-             "saw_down": (1, 0),
-             "square": (1, 1), }
-
-
+# byte 01
 wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform)
 wave_m2_1, wave_m2_2, wave_m2_3 = waveforms.get(m2.waveform)
-wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(m3.waveform)
-wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(m4.waveform)
-wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(m5.waveform)
-wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(m6.waveform)
-wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(m7.waveform)
-wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(m8.waveform)
-
-
 byte_01 = ToneByte(voice.line_a1, voice.line_a2, wave_m2_1, wave_m2_2, wave_m2_3, wave_m1_1, wave_m1_2, wave_m1_3, 1)
 
+# byte 02
+wave_m3_1, wave_m3_2, wave_m3_3 = waveforms.get(m3.waveform)
+wave_m4_1, wave_m4_2, wave_m4_3 = waveforms.get(m4.waveform)
 byte_02 = ToneByte(voice.line_b1, voice.line_b2, wave_m4_1, wave_m4_2, wave_m4_3, wave_m3_1, wave_m3_2, wave_m3_3, 2)
 
+# byte 03
+wave_m5_1, wave_m5_2, wave_m5_3 = waveforms.get(m5.waveform)
+wave_m6_1, wave_m6_2, wave_m6_3 = waveforms.get(m6.waveform)
 byte_03 = ToneByte(voice.line_c1, voice.line_c2, wave_m6_1, wave_m6_2, wave_m6_3, wave_m5_1, wave_m5_2, wave_m5_3, 3)
 
+# byte 0
+wave_m7_1, wave_m7_2, wave_m7_3 = waveforms.get(m7.waveform)
+wave_m8_1, wave_m8_2, wave_m8_3 = waveforms.get(m8.waveform)
 byte_04 = ToneByte(voice.line_d1, voice.line_d2, wave_m8_1, wave_m8_2, wave_m8_3, wave_m7_1, wave_m7_2, wave_m7_3, 4)
 
 # detune, in pairs of bytes 5-20
-
 # Module 1
 fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6 = hex_to_bits(m1.detune_fine, 6)
 byte_05 = ToneByte(fine_m1_1, fine_m1_2, fine_m1_3, fine_m1_4, fine_m1_5, fine_m1_6, m1.pitch_fix, m1.range_width, 5)
@@ -581,17 +607,6 @@ fine_m8_1, fine_m8_2, fine_m8_3, fine_m8_4, fine_m8_5, fine_m8_6 = hex_to_bits(m
 byte_19 = ToneByte(fine_m8_1, fine_m8_2, fine_m8_3, fine_m8_4, fine_m8_5, fine_m8_6, m8.pitch_fix, m8.range_width, 19)
 octn_m8_1, octn_m8_2, octn_m8_3, octn_m8_4, octn_m8_5, octn_m8_6, octn_m8_7 = hex_to_bits(m8.detune_notes, 7)
 byte_20 = ToneByte(m8.polarity, octn_m8_1, octn_m8_2, octn_m8_3, octn_m8_4, octn_m8_5, octn_m8_6, octn_m8_7, 20)
-
-
-m1.rate_1 = "1A"
-m2.rate_1 = "1B"
-m3.rate_1 = "1C"
-m4.rate_1 = "1D"
-m5.rate_1 = "1E"
-m6.rate_1 = "1F"
-m6.rate_1 = "12"
-m8.rate_1 = "13"
-
 
 modules = [m1, m2, m3, m4, m5, m6, m7, m8]
 # ar = amp rate bit
@@ -1146,17 +1161,14 @@ byte_335 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 335)
 
 
 # byte 336 checksum
-tone_checksum = calculate_checksum(tone_internal[:-1])
-chsm_1, chsm_2, chsm_3, chsm_4, chsm_5, chsm_6,  chsm_7, = hex_to_bits(tone_checksum, 7)
-byte_336 = ToneByte(0, chsm_1, chsm_2, chsm_3, chsm_4, chsm_5, chsm_6,  chsm_7, 336)
+# !!! checksum will be a full, non-split byte !!!
+tone_checksum = calculate_checksum(checksummable[:-1])
+tone_internal[672] = hex(tone_checksum)
+
 print(tone_internal)
 print("tone internal length:", len(tone_internal))
 print("checksum:", tone_checksum)
 
-ints = []
-for hex_str in tone_internal:
-    # Convert hexadecimal string to integer and append to list
-    ints.append(int(hex_str, 16))
 
 
 
