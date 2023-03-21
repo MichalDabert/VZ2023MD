@@ -9,11 +9,10 @@ for i in range(673):
     byte_num = str(i).zfill(2)
     byte_x = "byte_" + byte_num
     tone_internal.append(byte_x)
-print(tone_internal)
 
 
 checksummable = []
-for i in range(337):
+for i in range(336):
     """
     initializes a list of bytes.
     """
@@ -56,30 +55,42 @@ def calculate_checksum(sysex_data):
         sysex_data (list): a list of hexadecimal values
 
     Returns:
-        hex: hexadecimal checksum
+        int: 7 bit checksum
     """
-    new_checksum = 0
-    for i in range(0, len(sysex_data), 2):
-        new_checksum += int(sysex_data[i], 16) * 16 + int(sysex_data[i + 1], 16)
-    return (128 - new_checksum % 128) % 128
+    checksum = sum(sysex_data)
+    checksum = (128 - checksum % 128) % 128
+    return (checksum)
+
+def nibbles_to_bytes(nibbles):
+    bytes_list = []
+    for i in range(0, len(nibbles), 2):
+        byte = (nibbles[i] << 4) | nibbles[i + 1]
+        bytes_list.append(byte)
+    return bytes_list
 
 
-
-def bits_to_hex(b1, b2, b3, b4, b5, b6, b7, b8):
+def bits_to_hex(b1, b2, b3, b4, b5=None, b6=None, b7=None, b8=None):
     """
-    Calculates the hex value of 8 bits of data.
+    Calculates the hex value of up to 8 bits of data.
 
     Args:
         b1 (int): The first bit.
-        ~
-        b8 (int): The las number bit.
+        b2 (int): The second bit.
+        b3 (int): The third bit.
+        b4 (int): The fourth bit.
+        b5 (int): The fifth bit, optional.
+        b6 (int): The sixth bit, optional.
+        b7 (int): The seventh bit, optional.
+        b8 (int): The eighth bit, optional.
 
     Returns:
-        hex: The hex value of arguments as bits
+        int: The hex value of arguments as bits
     """
-    bits = [1 if b else 0 for b in [b1, b2, b3, b4, b5, b6, b7, b8]]  # list comprehension
+    bits = [1 if b else 0 for b in [b1, b2, b3, b4, b5, b6, b7, b8] if b is not None]  # list comprehension
     decimal = int(''.join(map(str, bits)), 2)
-    return hex(decimal)
+    hex_str = format(decimal, '02x')
+    return int('0x' + hex_str.zfill(2), 16)
+
 
 
 def hex_to_bits(hex_value, num_bits):
@@ -281,12 +292,12 @@ class ToneByte:
         self.bit_2 = bit_2
         self.bit_3 = bit_3
         self.bit_4 = bit_4
-        self.hex_value_upper = bits_to_hex(0, 0, 0, 0, bit_1, bit_2, bit_3, bit_4)
+        self.hex_value_upper = bits_to_hex(bit_1, bit_2, bit_3, bit_4)
         self.bit_5 = bit_5
         self.bit_6 = bit_6
         self.bit_7 = bit_7
         self.bit_8 = bit_8
-        self.hex_value_lower = bits_to_hex(0, 0, 0, 0, bit_5, bit_6, bit_7, bit_8)
+        self.hex_value_lower = bits_to_hex(bit_5, bit_6, bit_7, bit_8)
 
         self.checksum_hex_value = bits_to_hex(bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8)
 
@@ -1162,12 +1173,15 @@ byte_335 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 335)
 
 # byte 336 checksum
 # !!! checksum will be a full, non-split byte !!!
-tone_checksum = calculate_checksum(checksummable[:-1])
-tone_internal[672] = hex(tone_checksum)
+tone_checksum = calculate_checksum(checksummable)
+tone_internal[672] = (tone_checksum)
+if __name__ == "__main__":
+    print("tone internal:", tone_internal)
+    print("type of sample byte:", type(tone_internal[33]))
 
-print(tone_internal)
-print("tone internal length:", len(tone_internal))
-print("checksum:", tone_checksum)
+
+    print("tone internal length:", len(tone_internal))
+    print("checksum:", tone_checksum)
 
 
 
