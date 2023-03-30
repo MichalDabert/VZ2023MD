@@ -337,7 +337,7 @@ class Voice:
 
                  m4_ext_phase=False, m6_ext_phase=False, m8_ext_phase=False,
                  line_a="mix", line_b="mix", line_c="mix", line_d="mix",
-                 pitch_vel_rate_1=False, pitch_rate_1=0, pitch_sus_1=False, pitch_level_1=0,
+                 pitch_vel_rate_1=False, pitch_rate_1=0, pitch_sus_1=True, pitch_level_1="40",
                  pitch_vel_rate_2=False, pitch_rate_2=0, pitch_sus_2=False, pitch_level_2=0,
                  pitch_vel_rate_3=False, pitch_rate_3=0, pitch_sus_3=False, pitch_level_3=0,
                  pitch_vel_rate_4=False, pitch_rate_4=0, pitch_sus_4=False, pitch_level_4=0,
@@ -351,7 +351,7 @@ class Voice:
                  octave_pol=False, octave_no=0,
                  vib_multi=False, vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
                  trm_multi=False, trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
-                 voice_name="initVZ2023MD"):
+                 voice_name="VZ2023MD"):
         """
         Initializes a new instance of init tone of 8 sine waves, output mixed, max level, no release.
 
@@ -449,15 +449,15 @@ class Module:
                  detune_fine=0,
                  pitch_fix=False, range_width=False, polarity=True,
                  detune_notes=0,
-                 vel_rate_1=False, rate_1=0, sus_1=False, level_1=0,
-                 vel_rate_2=False, rate_2=0, sus_2=False, level_2=0,
+                 vel_rate_1=False, rate_1="7F", sus_1=True, level_1="7F",
+                 vel_rate_2=False, rate_2="7F", sus_2=False, level_2=0,
                  vel_rate_3=False, rate_3=0, sus_3=False, level_3=0,
                  vel_rate_4=False, rate_4=0, sus_4=False, level_4=0,
                  vel_rate_5=False, rate_5=0, sus_5=False, level_5=0,
                  vel_rate_6=False, rate_6=0, sus_6=False, level_6=0,
                  vel_rate_7=False, rate_7=0, sus_7=False, level_7=0,
                  vel_rate_8=False, rate_8=0, sus_8=False, level_8=0,
-                 amp_sens=0, env_end_step=0,
+                 amp_sens=0, env_end_step=1,
                  module_active=False,  # 0/False/ = module on
                  env_depth=0,
                  vel_curve=0, vel_sens=0,):
