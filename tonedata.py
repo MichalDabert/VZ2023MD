@@ -1,5 +1,5 @@
-""" This module includes functions for handling Voice and Module variables and combines them into a tone_internal list
-    of 333 bytes of voice patch data, 2 bytes of data equal to 0x20, and a checksum """
+""" Includes functions for handling Voice and Module variables and combines them into tone_internal and calculates
+a checksum """
 
 import time
 
@@ -530,6 +530,7 @@ initialized voice and 8 modules with default values
 
 voice = Voice()
 
+
 m1 = Module()
 m2 = Module()
 m3 = Module()
@@ -554,7 +555,7 @@ def process_voicedata():
 
 
     # byte 0
-    byte_0 = ToneByte(0, 0, 0, 0, 0, voice.m8_ext_phase, voice.m6_ext_phase, voice.m4_ext_phase, 0)
+    byte_00 = ToneByte(0, 0, 0, 0, 0, voice.m8_ext_phase, voice.m6_ext_phase, voice.m4_ext_phase, 0)
 
     # byte 01
     wave_m1_1, wave_m1_2, wave_m1_3 = waveforms.get(m1.waveform)
@@ -1181,7 +1182,7 @@ def process_voicedata():
 
     end_time = time.time()
     print(f"Time taken to process voice data: {end_time - start_time} seconds")
-voice.voice_name = ("misia").upper()
+
 
 
 def generate_checksum():
