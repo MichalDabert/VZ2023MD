@@ -2,6 +2,8 @@
 a checksum """
 
 import time
+import random
+import string
 
 tone_internal = []
 for i in range(673):
@@ -353,7 +355,7 @@ class Voice:
                  octave_pol=False, octave_no=0,
                  vib_multi=False, vib_wave="triangle", vib_depth=0, vib_rate=0, vib_delay=0,
                  trm_multi=False, trm_wave="triangle", trm_depth=0, trm_rate=0, trm_delay=0,
-                 voice_name="1.1.VZ2023MD"):
+                 voice_name="VZ-MD-"):
         """
         Initializes a new instance of init tone of 8 sine waves, output mixed, max level, no release.
 
@@ -442,6 +444,13 @@ class Voice:
         self.trm_depth = trm_depth
         self.trm_rate = trm_rate
         self.trm_delay = trm_delay
+
+        def generate_random_voicename():
+            characters = string.ascii_uppercase + string.digits  # generates a salt for voice name
+            random_string = ''.join(random.choice(characters) for _ in range(12 - len(voice_name)))
+            print(random_string)
+            return random_string
+        voice_name = voice_name + generate_random_voicename()
 
         self.voice_name = voice_name
 
