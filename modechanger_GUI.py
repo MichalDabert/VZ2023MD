@@ -1,10 +1,11 @@
 import rtmidi
 from PySide6 import QtGui
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, QSlider, QLabel, QDialog
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget, QComboBox, \
+    QSlider, QLabel, QDialog, QCheckBox, QMenu
 import tonedata
 
-#from qt_material import apply_stylesheet
 
 
 """
@@ -80,11 +81,11 @@ dialog = MidiPortDialog()
 dialog.setWindowFlags(Qt.WindowStaysOnTopHint)
 dialog.exec()
 main_window = QMainWindow()
+
 main_window.setWindowTitle("CASIO VZ1 controller VZ2023MD")
 main_window.setMinimumWidth(666)
 icon = QtGui.QIcon("VZ2023MD.png")
 main_window.setWindowIcon(icon)
-#apply_stylesheet(app, theme='dark_red.xml')
 
 try:
     midi_channel = dialog.selected_midich
@@ -140,9 +141,14 @@ syx_messages = {  # MIDI system exclusive
     "ok"         : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x72, 0xF7],
     "error"      : [0xF0, 0x44, 0x03, 0x00, midi_channel, 0x73, 0xF7],
     }
-syx_messages["tone_data"].extend(tonedata.tone_internal)
-syx_messages["tone_data"].append(0xF7)
-print(syx_messages["tone_data"])
+
+def update_tone_data():
+    syx_messages["tone_data"] = [0xF0, 0x44, 0x03, 0x00, 0x70, 0x00, 0x40]
+    syx_messages["tone_data"].extend(tonedata.tone_internal)
+    syx_messages["tone_data"].append(0xF7)
+    print(f"tone_data updated. Checksum: {tonedata.tone_internal[672]}")
+
+update_tone_data()
 
 """
 bend range slider
@@ -279,6 +285,40 @@ bank_combo.currentIndexChanged.connect(lambda: send_program_change(bank_combo, v
 voice_combo.currentIndexChanged.connect(lambda: send_program_change(bank_combo, voice_combo))
 
 
+
+def update_variable():
+    tonedata.process_voicedata()
+    tonedata.generate_checksum()
+    update_tone_data()
+
+
+class ToggleSwitch(QWidget):
+    def __init__(self, variable_name, initial_state):
+        super().__init__()
+
+        self.variable_name = variable_name
+        self.state = initial_state
+
+        self.initUI()
+
+    def initUI(self):
+        layout = QVBoxLayout()
+
+        self.toggle = QCheckBox(f"{self.variable_name} = {self.state}")
+        self.toggle.setChecked(self.state)  # Set the initial state
+
+        layout.addWidget(self.toggle)
+        self.setLayout(layout)
+
+        # Connect the stateChanged signal to a custom function
+        self.toggle.stateChanged.connect(self.onStateChanged)
+
+    def onStateChanged(self, state):
+        self.state = bool(state)
+        setattr(tonedata.voice, self.variable_name, self.state)
+        print(f"Switch state changed: {self.variable_name} = {self.state}")
+        update_variable()
+
 def send_program_change(bank_combo, voice_combo):
     bank_index = bank_combo.currentIndex()  # Get the selected index for each combo box
     voice_index = voice_combo.currentIndex()
@@ -291,6 +331,9 @@ def send_program_change(bank_combo, voice_combo):
 PySide layout
 """
 
+
+
+
 main_layout = QVBoxLayout()
 top_box = QVBoxLayout()
 layout3 = QHBoxLayout()
@@ -298,6 +341,17 @@ layout4 = QHBoxLayout()
 main_layout.addLayout(top_box)
 main_layout.addLayout(layout3)
 main_layout.addLayout(layout4)
+
+
+toggles = []
+toggle_variables = ["m4_ext_phase", "m6_ext_phase", "m8_ext_phase"]
+
+for variable in toggle_variables:
+    initial_state = getattr(tonedata.voice, variable)
+    toggle = ToggleSwitch(variable, initial_state)
+    toggles.append(toggle)
+    top_box.addWidget(toggle)
+
 
 top_box.addWidget(transpose_selector)
 top_box.addWidget(bend_slider)
@@ -316,6 +370,7 @@ top_box.addWidget(bank_combo)
 top_box.addWidget(voice_combo)
 central_widget = QWidget()
 central_widget.setLayout(main_layout)
+
 main_window.setCentralWidget(central_widget)
 main_window.show()
 app.exec()

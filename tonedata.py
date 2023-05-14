@@ -1,7 +1,6 @@
 """ Includes functions for handling Voice and Module variables and combines them into tone_internal and calculates
 a checksum """
 
-import time
 import random
 import string
 
@@ -448,7 +447,7 @@ class Voice:
         def generate_random_voicename():
             characters = string.ascii_uppercase + string.digits  # generates a salt for voice_name
             random_string = ''.join(random.choice(characters) for _ in range(12 - len(voice_name)))
-            print(random_string)
+            print("current voice name suffix:", random_string)
             return random_string
         voice_name = voice_name + generate_random_voicename()
 
@@ -556,7 +555,6 @@ rate_kbfollow = KbFollow()
 
 
 def process_voicedata():
-    start_time = time.time()
 
     """
     bytes of data formatted according to VZ-1/VZ-10m MIDI System Exclusive Format
@@ -1186,11 +1184,6 @@ def process_voicedata():
     # byte 334, 335: spacebars
     byte_334 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 334)
     byte_335 = ToneByte(0, 0, 1, 0, 0, 0, 0, 0, 335)
-
-
-
-    end_time = time.time()
-    print(f"Time taken to process voice data: {end_time - start_time} seconds")
 
 
 
