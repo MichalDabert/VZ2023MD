@@ -446,7 +446,7 @@ class Voice:
         self.trm_delay = trm_delay
 
         def generate_random_voicename():
-            characters = string.ascii_uppercase + string.digits  # generates a salt for voice name
+            characters = string.ascii_uppercase + string.digits  # generates a salt for voice_name
             random_string = ''.join(random.choice(characters) for _ in range(12 - len(voice_name)))
             print(random_string)
             return random_string
