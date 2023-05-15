@@ -304,7 +304,7 @@ class ToggleSwitch(QWidget):
     def initUI(self):
         layout = QVBoxLayout()
 
-        self.toggle = QCheckBox(f"{self.variable_name} = {self.state}")
+        self.toggle = QCheckBox(f"{self.variable_name}")
         self.toggle.setChecked(self.state)  # Set the initial state
 
         layout.addWidget(self.toggle)
@@ -344,7 +344,11 @@ main_layout.addLayout(layout4)
 
 
 toggles = []
-toggle_variables = ["m4_ext_phase", "m6_ext_phase", "m8_ext_phase"]
+toggle_variables = ["m4_ext_phase", "m6_ext_phase", "m8_ext_phase", "pitch_vel_rate_1", "pitch_vel_rate_2",
+                    "pitch_vel_rate_3", "pitch_vel_rate_4", "pitch_vel_rate_5", "pitch_vel_rate_6", "pitch_vel_rate_7",
+                    "pitch_vel_rate_8", "pitch_sus_1", "pitch_sus_2", "pitch_sus_3", "pitch_sus_4", "pitch_sus_5",
+                    "pitch_sus_6", "pitch_sus_7", "pitch_sus_8", "pitch_range", "octave_pol", "vib_multi", "trm_multi",
+                    ]
 
 for variable in toggle_variables:
     initial_state = getattr(tonedata.voice, variable)
